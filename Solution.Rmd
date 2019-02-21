@@ -1,0 +1,15 @@
+---
+title: "Regression Assignment 2019"
+author: "Anders Christensen, Anna Damkjaer Laksafoss and Stefan Bruhn Rasmussen"
+date: "3 march 2019"
+output: html_document
+---
+
+# Exploratory analysis
+
+```{r dummy}
+1+1
+```
+
+
+# Analysis
