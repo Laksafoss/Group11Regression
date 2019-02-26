@@ -41,7 +41,7 @@ NROW(narwhal)
 narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
 # Save
 narwhal <- narwhal %>% ungroup()
-saveRDS(narwhal, file = "outputs/narwhal.RDS")
+saveRDS(narwhal, file = "outputs/narwhal_modified.RDS")
 # Save reduced data set (selected such that both whales are present
-saveRDS(narwhal$Ind[(369254-10000):(369254+10000)], file = "outputs/narwhal_reduced.RDS")
+saveRDS(narwhal$Ind[(369254-10000):(369254+10000)], file = "outputs/narwhal_modified_reduced.RDS")
 
