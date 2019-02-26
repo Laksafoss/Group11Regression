@@ -23,16 +23,42 @@ numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 4, top = "Density plots
 numplots
 ggsave(numplots, filename = "figs/numerical_densities.png",device = "png")
 
-# Timeplot
+# Depth/Timeplot
+
 depthtimeplot <- ggplot(narwhal, aes(x = Datetime)) +
   geom_line(aes(y = Depth)) +
   facet_wrap(c("Ind", "Phase"), labeller = "label_both", scales = "free_x") +
   ggtitle("Depth over time by phase and Ind")
 ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png")
+
+depthtimeplotPhases <- ggplot(narwhal) +
+  geom_rect(
+    aes(x = NULL ,xmin = start, xmax = end, fill = Phase),
+    ymin = -Inf, ymax = Inf, alpha = 0.5,
+    data = times
+  ) + 
+  geom_line(aes(x = Datetime, y = Depth), size = 0.3) +
+  facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
+  ggtitle("Depth over time by Ind, shaded by Phase")
+
+ggsave(depthtimeplotPhases, filename = "figs/depthtimeplotPhases.png", device = "png")
+
+depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
+  geom_rect(
+    aes(x = NULL ,xmin = start, xmax = end, fill = Phase),
+    ymin = -Inf, ymax = Inf, alpha = 0.5,
+    data = times[-1,]
+  ) + 
+  geom_line(aes(x = Datetime, y = Depth), size = 0.3) +
+  facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
+  ggtitle("Depth over time by Ind, shaded by Phase")
+depthtimeplotPhasesNoB
+ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
+
 # Location plot
 locationplot <- ggplot(narwhal,
                        aes(x = Lat, y = Long, group = Ind)) +
-  geom_path()  +
+  geom_path(aes(colour = Datetime))  +
   facet_wrap("Ind", labeller = "label_both") +
   ggtitle("Location Plot")
 ggsave(locationplot, filename = "figs/locationplot.png", device = "png")
