@@ -1,7 +1,7 @@
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
-narwhal <- readRDS(file = "outputs/narwhal.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 # histrogram/Density plots of numerical variables
 numnames <- c("Depth","Dist.to.Paamiut","Dist.to.shore","ODBA", "VeDBA", "Lat", "Long", "Strokerate")
@@ -34,3 +34,5 @@ locationplot <- ggplot(narwhal,
   facet_wrap("Ind", labeller = "label_both") +
   ggtitle("Location Plot")
 ggsave(locationplot, filename = "figs/locationplot.png", device = "png")
+
+
