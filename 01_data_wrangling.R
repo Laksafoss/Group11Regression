@@ -69,6 +69,11 @@ narwhal <- narwhal %>% group_by(Ind, DiveNumber) %>% mutate(DiveDepth = ifelse(i
 
 # Save
 narwhal <- narwhal %>% ungroup()
+
+# Add the summarizing variable Sound
+narwhal$Sound <- as.numeric(narwhal$Call) + as.numeric(narwhal$Buzz) + as.numeric(narwhal$Click) - 3
+narwhal$Sound.bi <- ifelse(narwhal$Sound == 0, 0, 1) 
+                      
 saveRDS(narwhal, file = "outputs/narwhal_modified.RDS")
 # Save reduced data set (selected such that both whales are present
 saveRDS(narwhal$Ind[(369254-10000):(369254+10000)], file = "outputs/narwhal_modified_reduced.RDS")
