@@ -18,15 +18,20 @@ narwhal <- readRDS("outputs/narwhal.RDS")
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Data wrangling
-**Corrections made**
 
-* Change all variables to have capitalized start letter
-* Change *Strokerate* to be of type "integer" instead of "numerical"
+## Data clean up
+Before we can analyse the data we must clean up the data. From the description of the data we can make the following initial changes:
 * Combine *Date* and *Hour* to a new single time object called *Datetime*.
-* Correct for positve *Depths* (by substracting maximum value from all values)
+* Correct for positve *Depths* by substracting maximum value from all values
+* Encode -1 as NA for those variables, where it applies
+
+We also add a new variable
+* *BothWhales* binary, encodes when both we have data on both whales at the current timepoint
+
+Lastly we have removed the following data rows and variables
 * Remove duplicate rows
-* Add binary variable indicating if both whales are present
+
+
 
 ## Exploratory analysis
 ```{r summaries}
