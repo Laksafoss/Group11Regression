@@ -55,18 +55,17 @@ Lastly there are a few issues of duplicate data lines. **WHICH ONES AND WHAT DID
 
 
 ## Exploratory analysis
-Now that data is complete we can take a more detailed look at the individual variables. As the dataset consits of 21 variables, we will consider 
+Now that data is complete we can take a more detailed look at the individual variables. As the dataset consits of 21 variables, we will plot and analyze these variables in groups. 
 
 
-##### The potential response variables
+### The potential response variables
 Let us first look at our potential respons variables. 
 
-```{r}
+```{r sum_response}
 summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
 ```
 
 **HERE WE WILL ALSO BE ADDING NEW VARIABLES** :  
-*Adding new valiables*: To better understand our research question we have created some new variables **ADD A DESCRIPTION OF WHY THIS NEW VARIABLE IS BETTER**
 
 
 
@@ -75,15 +74,19 @@ summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buz
 * `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set.
 * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
 
+![](figs/depthtimeplot.png)
 
 
-
-```{r summaries}
-summary(narwhal[,c(3:19)])
-table(narwhal[,c("Ind","Phase")])
+### The categorical explanatory variables
+```{r sum_cat_explanatory}
+summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
 
-### Plot af numeriske variable
+
+### The numeric explanatory variables
+```{r sum_num_explanatory}
+summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
+```
 
 ![](figs/numerical_densities.png)
 
@@ -91,8 +94,15 @@ Vi ser at
 
 * Strokerate er "hakket" fordi det kun er integers
 
-![](figs/depthtimeplot.png)
 ![](figs/locationplot.png)
+
+```{r summaries}
+summary(narwhal[,c(3:19)])
+table(narwhal[,c("Ind","Phase")])
+```
+
+
+
 
 ### Ideas/Thoughts
 
