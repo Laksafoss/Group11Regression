@@ -1,6 +1,8 @@
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
+library(Hmisc)
+library(corrplot)
 narwhal <- readRDS(file = "outputs/narwhal.RDS")
 
 # histrogram/Density plots of numerical variables
@@ -34,3 +36,12 @@ locationplot <- ggplot(narwhal,
   facet_wrap("Ind", labeller = "label_both") +
   ggtitle("Location Plot")
 ggsave(locationplot, filename = "figs/locationplot.png", device = "png")
+
+# Correlation matrix for categorical variables
+narwhalcat <- narwhal[, c(4,5,6,7,8,10,12,13,19)]
+
+cormat1 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
+
+png("figs/correlationmatrix.png")
+catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
+dev.off()
