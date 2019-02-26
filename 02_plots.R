@@ -3,7 +3,7 @@ library(gridExtra)
 library(dplyr)
 library(Hmisc)
 library(corrplot)
-narwhal <- readRDS(file = "outputs/narwhal.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 # histrogram/Density plots of numerical variables
 numnames <- c("Depth","Dist.to.Paamiut","Dist.to.shore","ODBA", "VeDBA", "Lat", "Long", "Strokerate")
