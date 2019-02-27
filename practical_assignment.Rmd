@@ -47,8 +47,10 @@ We found 8 pairs of duplicat data lines, where the `Datetime` and `Ind` (whale n
 
 Furthermore a closer inspection of the `phase` variable reveals that the naming of the different levels of the variable does not correspond to description of the variable. Specifically, the Trial and Intermediate indicators ("Tx" and "Ix") in the name of the levels does not correspond to the expected seismic activity (1 and 0 respectively). Further, the ordinal part of the name of the variables (0 through 5) does not correspond to the expected time of measurement - that is, we expect T2 to be conducted before T3, but this is not the case in the data. This is allso illustrated in Figur 1 below. 
 
-**PLOT : PHASE PROBLEMER**
-*Figur 1*: **DESCRIPTION OF PLOT.**
+<div style="text-align:center">
+**PLOT : PHASE PROBLEMER**<br>
+*Figur 1*: **DESCRIPTION OF PLOT.**<br>
+</div>
 We see that if we adjust for the two problems mentioned above, we see that our expectations are met in a third way: between each trial there is an intermediate period.
 
 As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable `Newphase`. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. 
