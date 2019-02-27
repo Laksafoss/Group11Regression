@@ -1,6 +1,7 @@
 library(Hmisc)
 library(corrplot)
 library(gridExtra)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 
@@ -71,6 +72,17 @@ PhasePlot <- ggplot(times, aes(x = Phase, color = Phase)) +
   facet_wrap("Ind", nrow = 2) + coord_flip()
 ggsave(PhasePlot, filename = "figs/OldPhasePlot.png", device = "png")
 
+
+#NewPhase data + plot
+narwhal$NewPhase <- narwhal$Phase
+narwhal$NewPhase <- mapvalues(narwhal$NewPhase, c("B", "I0", "I3", "T0", "T3", "I1","I4","T1","T4","I2","I5","T2","T5"), 
+          c("B","I0","T0","I1","T1","I2","T2","I3","T3","I4","T4","I5","T5"))
+narwhal$NewPhase <- ordered(narwhal$NewPhase, levels = c("B","I0","T0","I1","T1","I2","T2","I3","T3","I4","T4","I5","T5"))
+NewPhasePlot <- ggplot(narwhal, aes(Datetime, NewPhase)) +   
+  geom_line() + facet_wrap("Ind", nrow = 2) + coord_flip()
+ggsave(NewPhasePlot, filename = "figs/NewPhasePlot.png", device = "png")
+
+
 # Location plot
 startstop <- narwhal %>%
   group_by(Ind) %>%
@@ -136,3 +148,4 @@ cormat1 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
 png("figs/correlationmatrix.png")
 catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
 dev.off()
+
