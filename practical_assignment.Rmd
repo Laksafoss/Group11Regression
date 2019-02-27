@@ -146,6 +146,6 @@ table(narwhal[,c("Ind","Phase")])
 
 
 ##Time of day factor
-Since the time of day (e.g. morning) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight (since the water temperature might then be higher). Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. 
+Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity. 
 
 Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
