@@ -8,17 +8,18 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(eval = FALSE)
+library(kableExtra)
+library(dplyr)
+knitr::opts_chunk$set(eval = TRUE)
 ```
 
 
 ```{r read_data, include=FALSE}
 fullrun <- TRUE
 if (fullrun) {
-  narwhal <- readRDS("outputs/narwhal.RDS")
+  narwhal <- readRDS("outputs/narwhal_modified.RDS")
 } else {
-  narwhal <- readRDS("outputs/narwhal_reduced.RDS")
+  narwhal <- readRDS("outputs/narwhal_modified_reduced.RDS")
 }
 ```
 
@@ -43,25 +44,11 @@ Before we can analyse the data we must clean up the data. The data set contains 
 * Correct for positve `Depths` by substracting maximum value from all values
 * Encode -1 as NA for those variables, where it applies
 
-We found 8 pairs of duplicat data lines, where the `Datetime` and `Ind` (whale name) were recoreded twice. To deal with this we simply average the duplicat pairs of data lines. 
-
-Furthermore a closer inspection of the `phase` variable reveals that the naming of the different levels of the variable does not correspond to description of the variable. Specifically, the Trial and Intermediate indicators ("Tx" and "Ix") in the name of the levels does not correspond to the expected seismic activity (1 and 0 respectively). Further, the ordinal part of the name of the variables (0 through 5) does not correspond to the expected time of measurement - that is, we expect T2 to be conducted before T3, but this is not the case in the data. This is allso illustrated in Figur 1 below. 
-
-<div style="text-align:center">
-**PLOT : PHASE PROBLEMER**<br>
-*Figur 1*: **DESCRIPTION OF PLOT.**<br>
-We see that if we adjust for the two problems mentioned above, we see that our expectations are met in a third way: between each trial there is an intermediate period.
-</div>
-
-As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable `Newphase`. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. 
-**HOW IS NEWPHASE ENCODED** 
-
-
 ##### Aggregrating the data
 We have choosen to aggregrate the data before analyzing it. Below we explain how we have chosen to aggregrate data and here we list our reasons for aggregrating data.
 
 * The raw dataset has over a million data lines and fitting models on a dataset of this size is quite computationally heavy and plotting becomes slow.
-* The binary variables `Call`, `Buzz`, `Click` are all recorded as a time series of signals, that is, most observations are zero and then there are a few ones when a call or buzz starts. As we are not doing time series analysis it will be hard to model the raw signals. Therefor it is convenient to summarize the number of calls, buzz and click over some time interval. 
+* The binary variables `Call`, `Buzz`, `Click` **Click is 1 in 21% of observations** are all recorded as a time series of signals, that is, most observations are zero and then there are a few ones when a call or buzz starts. As we are not doing time series analysis it will be hard to model the raw signals. Therefor it is convenient to summarize the number of calls, buzz and click over some time interval. 
 
 We have chosen to aggregrate data based on a new variable called `Divenumber`. `Divenumber` records when the whale is below 10 meters. When the whale is less then 10 meters below the water surface the `Divenumber` is set to a negative integer and when it is more then 10 meters from the surface `Divenumber` is set to a positive integer. The integers are chosen such that the first time the whale is above 10 meters `Divenumber` is set to -1 and the first time it is below 10 meters `Divenumber` is set to 1. We then count such that the next streach of time near the surface we have `Divenumber = -2` and the next dive period we have `Divenumber = 2` and so on.
 
@@ -97,7 +84,25 @@ As the dataset has over a million datalines and 780.853 these have missing value
 * `Lat` and `Long`: 10.882 missing values. **DESCRIPTION**
 * `Strokerate`: 693 missing values. **DESCRIPTION**
 
-Lastly there are a few issues of duplicate data lines. **WHICH ONES AND WHAT DID WE DO**
+Lastly there are a few issues of duplicate observations. There were 16 identical observations and 4 observations which only differed in `Dist.to.Paamiut`. Looking at the table below we see that all 16 identical observations has `Dist.to.Paamiut` = NA.
+For the 16 identical observations, the duplicates was deleted from the data set. The observation pairs 9,10 and 11,12 only differs very slighty in `Dist.to.Paamiut` so two new observations with `Dist.to.Paamiut` equal to the mean of `Dist.to.Paamiut` in each pair and all other attributes the same.    
+
+```{r, echo=FALSE}
+Alldups <- readRDS("outputs/AllDuplicates.RDS")
+Twodups <- readRDS("outputs/TwoDuplicates.RDS")
+row.names(Twodups)[1:2] <- c("  "," ")
+dups <- rbind(Alldups,Twodups)
+dups[,c("Datetime","Ind","Depth","Dist.to.Paamiut")] %>%
+  mutate(Dist.to.Paamiut = 
+           cell_spec(Dist.to.Paamiut,
+                     bold = ifelse(is.na(Dist.to.Paamiut), FALSE,TRUE),
+                     color  = ifelse(is.na(Dist.to.Paamiut), "black","red"))) %>% 
+kable(escape = F) %>% 
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>% 
+group_rows("Replacement for rows 9 and 10", 21, 21) %>%
+group_rows("Replacement for rows 11 and 12", 22, 22) %>% 
+row_spec(9:12,background = "#fca9b6") 
+```
 
 
 ## Exploratory analysis
@@ -165,3 +170,6 @@ table(narwhal[,c("Ind","Phase")])
 Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity. 
 
 Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
+
+## Appendix
+
