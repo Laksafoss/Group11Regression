@@ -1,8 +1,6 @@
 library(lubridate) # for date and times
-library(plyr)
 library(dplyr) # general purpose data manipulation
 narwhal <- readRDS(file = "data/narwhal.RDS")
-
 ## Data wrangling
 # Change all variables to have capitalized start letter
 firstletterupper <- sapply(names(narwhal), function(x) toupper(substring(x,1,1)))
@@ -16,15 +14,8 @@ narwhal$Datetime <- parse_date_time(datetimes,"Ymd HMS")
 # Correct for positve depths (by substracting maximum value)
 narwhal$Depth <- narwhal$Depth - max(narwhal$Depth)
 # Order Phase
-levels(narwhal$Phase) <- factor(c("B", "I0", "T0", "I1","T1", "I2", "T2", "I3", "T3", "I4", "T4", "I5","T5"), ordered = TRUE)
-# Create new (and correct) Phase
-NewPhases <- c("B", "I0", "I3", "T0","T3", "I1", "I4", "T1", "T4", "I2", "I5", "T2","T5")
-narwhal$NewPhase <- mapvalues(narwhal$Phase,
-                              from =levels(narwhal$Phase),
-          to = NewPhases)
-levels(narwhal$NewPhase) <- factor(c("B", "I0", "I3", "T0","T3", "I1", "I4", "T1", "T4", "I2", "I5", "T2","T5"), ordered = TRUE)
-
-#narwhal %>% group_by(Phase) %>% summarise(start = min(Datetime)) %>% arrange(start)
+Phases <- c("B", "I0", "T0", "I1","T1", "I2", "T2", "I3", "T3", "I4", "T4", "I5","T5")
+narwhal$Phase <- factor(narwhal$Phase, levels = Phases, ordered = TRUE)
 # Change "-1" to NA in Long, Lat and dist.*
 narwhal <- narwhal %>% mutate(Long = na_if(Long,-1),
                    Lat = na_if(Lat,-1),
@@ -40,14 +31,14 @@ duplicates2 <- which(duplicated(narwhal[,c("Datetime","Ind")],fromLast = TRUE))
 dupsId <- c(duplicates1, duplicates2)
 dups <- narwhal[dupsId,] %>% arrange(Ind, Datetime)  
 ## save dups
-saveRDS(dups, file = "outputs/duplicates.RDS")
+saveRDS(dups, file = "outputs/AllDuplicates.RDS")
 newrows <- dups[9:12,]
 newrows[1,"Dist.to.Paamiut"] <- mean(newrows[1:2,"Dist.to.Paamiut"])  
 newrows[3,"Dist.to.Paamiut"] <- mean(newrows[3:4,"Dist.to.Paamiut"])  
 # Remove dupls (use mean when different Dists)
 narwhal <- narwhal[-dupsId,]
 narwhal <- rbind(newrows[c(1,3),],narwhal)
-saveRDS(newrows[c(1,3),], file = "outputs/duplicates.RDS")
+saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
 # Add binary varbiale indicating if both whales are present
 narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
 # max Depth
