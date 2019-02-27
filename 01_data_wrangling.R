@@ -1,18 +1,30 @@
 library(lubridate) # for date and times
 library(dplyr) # general purpose data manipulation
+
+
+
+# ==  STEP 1  :  CLEAN UP RAW DATA A BIT  ======================================
 narwhal <- readRDS(file = "data/narwhal.RDS")
 ## Data wrangling
 # Change all variables to have capitalized start letter
 firstletterupper <- sapply(names(narwhal), function(x) toupper(substring(x,1,1)))
 lastletters <- sapply(names(narwhal), function(x) substring(x,2,nchar(x)))
 names(narwhal) <- paste0(firstletterupper, lastletters)
-# change Strokerate to integer
-narwhal$Strokerate <- as.integer(narwhal$Strokerate)
+
 # Add a single datetime object
 datetimes <- paste(narwhal[,1], narwhal[,2], sep = " ")
 narwhal$Datetime <- parse_date_time(datetimes,"Ymd HMS")
-# Correct for positve depths (by substracting maximum value)
-narwhal$Depth <- narwhal$Depth - max(narwhal$Depth)
+
+# Jeg slog soltimerne for Lat 70, Long -26 den 16 august 2017 op
+sundown <- c("21","22","23","00","01","02")
+sunup1 <- c("03","04","05","06","07","08","09","10","11") # mid day kl 11:48
+sunup2 <- c("12","13","14","15","16","17","18","19","20")
+narwhal$Sun <- as.factor(ifelse(substring(narwhal$Hour, 1,2) %in% sundown, "down", "up"))
+
+
+# Correct for positve depths (by substracting maximum value) - make positive
+narwhal$Depth <- - (narwhal$Depth - max(narwhal$Depth))
+
 # Order Phase
 Phases <- c("B", "I0", "T0", "I1","T1", "I2", "T2", "I3", "T3", "I4", "T4", "I5","T5")
 narwhal$Phase <- factor(narwhal$Phase, levels = Phases, ordered = TRUE)
@@ -38,6 +50,7 @@ newrows[3,"Dist.to.Paamiut"] <- mean(newrows[3:4,"Dist.to.Paamiut"])
 # Remove dupls (use mean when different Dists)
 narwhal <- narwhal[-dupsId,]
 narwhal <- rbind(newrows[c(1,3),],narwhal)
+
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
 # Add binary varbiale indicating if both whales are present
 narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
@@ -63,35 +76,119 @@ findDives <- function(Diving) {
   Dives
 }
 
-narwhal <- narwhal %>% group_by(Ind) %>% arrange(Datetime) %>% mutate(DiveNumber = findDives(Diving))
-narwhal <- narwhal %>% group_by(Ind, DiveNumber) %>% mutate(DiveDepth = ifelse(is.na(DiveNumber),NA,min(Depth))) %>% arrange(Ind, Datetime)
 
-narwhal_summarised <- narwhal %>% group_by(Ind, DiveNumber) %>% summarise(MaxDepth = max(Depth),
-                                                               MeanDepth = mean(Depth),
-                                                               DatetimeStart = min(Datetime),
-                                                               DiveEnd = max(Datetime),
-                                                               CallsSum = sum(as.numeric(Call)),
-                                                               BuzzSum = sum(as.numeric(Call)),
-                                                               ODBAMax = max(ODBA),
-                                                               ODBAMean = mean(ODBA),
-                                                               VeDBA = max(VeDBA),
-                                                               VeDBAMean = mean(VeDBA),
-                                                               StrokeRateMax = max(Strokerate),
-                                                               StrokeRateMean = mean(Strokerate),
-                                                               Dist.to.shoreMax = max(Dist.to.shore),
-                                                               Dist.to.shoreMean = mean(Dist.to.shore),
-                                                               Dist.to.PaamiutMax = max(Dist.to.Paamiut),
-                                                               Dist.to.PaamiutMean = mean(Dist.to.Paamiut)
-)
-                                                               
-                                                               
 # Save
 narwhal <- narwhal %>% ungroup()
 
-# Add the summarizing variable Sound
-narwhal$Sound <- as.numeric(narwhal$Call) + as.numeric(narwhal$Buzz) + as.numeric(narwhal$Click) - 3
-narwhal$Sound.bi <- ifelse(narwhal$Sound == 0, 0, 1) 
-                      
+
+## ==  STEP 2 : CREATE SUMMARIZED DATASETS  ====================================
+
+# I have made a funciton that summarizes the data as we want it
+find_sub_data <- function(x) {
+  X <- narwhal_summarised <- narwhal %>%
+    group_by((!!as.name(x)), Ind) %>%
+    summarise(Start = min(Datetime, na.rm = T),
+              End = max(Datetime, na.rm = T),
+              Depth = mean(Depth, na.rm = T),
+              Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
+              Phase = first(NewPhase),
+              Area = first(Area),
+              Call = mean(as.numeric(Call), na.rm = T),
+              Acou.qua = first(Acou.qua),
+              Dist.to.Paamiut = mean(Dist.to.Paamiut, na.rm = T),
+              Dist.to.shore = mean(Dist.to.shore),
+              Click = mean(as.numeric(Click) - 1, na.rm = T),
+              Buzz = mean(as.numeric(Call) - 1, na.rm = T),
+              ODBA = mean(ODBA, na.rm = T),
+              StrokeRate = mean(Strokerate, na.rm = T),
+              Los = first(Los),
+              Sun = first(Sun)
+    )
+  X <- X[ ,-1]
+  X$Dive <- X$Depth > 10
+  return(X)
+}
+
+
+
+
+## TIME OF DAY ANALYSIS ========================================================
+narwhal$Minut <- substring(narwhal$Datetime, 1,15) # every 10 minuts
+TenMinData <- find_sub_data("Minut")
+
+narwhal$Minut <- substring(narwhal$Datetime, 1,16) # every minut
+MinData <- find_sub_data("Minut")
+
+
+## DIVING ANALYSIS  ============================================================
+create_dive_cut <- function(x) {
+  N <- nrow(narwhal)
+  X <- numeric(N)
+  Diving <- ifelse(narwhal$Depth > x, 1, -1)
+  jumps <- c(0, which(diff(Diving) != 0), N)
+  rep.int(1:(length(jumps)-1), times = diff(jumps))
+}
+
+narwhal$Diving <- create_dive_cut(10)
+Diving10Data <- find_sub_data("Diving")
+
+
+
+# DepthCutoff <- 10
+# narwhal$Diving <- narwhal$Depth > DepthCutoff
+# findDives <- function(Diving) {
+#   Diving <- as.vector(Diving)
+#   DiveNumber <- 0
+#   IsDiving <- Diving[1]
+#   Dives <- rep(NA, NROW(Diving))
+#   for(i in 1:NROW(Diving)) {
+#   if (Diving[i]) {
+#     if(!IsDiving) {
+#       DiveNumber <- DiveNumber + 1
+#       IsDiving <- TRUE
+#     }
+#     Dives[i] <- DiveNumber 
+#   } else {
+#     IsDiving <- FALSE
+#     }
+#   }
+#   Dives
+# }
+
+
+# narwhal <- narwhal %>% 
+#   group_by(Ind) %>% 
+#   arrange(Datetime) %>% 
+#   mutate(DiveNumber = findDives(Diving))
+# narwhal <- narwhal %>% 
+#   group_by(Ind, DiveNumber) %>% 
+#   mutate(DiveDepth = ifelse(is.na(DiveNumber),NA,min(Depth))) %>% 
+#   arrange(Ind, Datetime)
+# 
+# narwhal_summarised <- narwhal %>%
+#   group_by(Ind, DiveNumber) %>%
+#   summarise(MaxDepth = max(Depth, na.rm = T),
+#             MeanDepth = mean(Depth, na.rm = T),
+#             DatetimeStart = min(Datetime, na.rm = T),
+#             DiveEnd = max(Datetime, na.rm = T),
+#             CallsSum = sum(as.numeric(Call), na.rm = T),
+#             BuzzSum = sum(as.numeric(Call), na.rm = T),
+#             ODBAMax = max(ODBA, na.rm = T),
+#             ODBAMean = mean(ODBA, na.rm = T),
+#             VeDBA = max(VeDBA, na.rm = T),
+#             VeDBAMean = mean(VeDBA, na.rm = T),
+#             StrokeRateMax = max(Strokerate, na.rm = T),
+#             StrokeRateMean = mean(Strokerate, na.rm = T),
+#             Dist.to.shoreMax = max(Dist.to.shore, na.rm = T),
+#             Dist.to.shoreMean = mean(Dist.to.shore, na.rm = T),
+#             Dist.to.PaamiutMax = max(Dist.to.Paamiut, na.rm = T),
+#             Dist.to.PaamiutMean = mean(Dist.to.Paamiut, na.rm = T)
+# )
+
+## ==  STEP 3 : EXPORT EVERYTHING  =============================================
 saveRDS(narwhal, file = "outputs/narwhal_modified.RDS")
+saveRDS(Diving10Data, file = "outputs/narwhal_Diving.RDS")
+saveRDS(TenMinData, file = "outputs/narwhal_TenMinut.RDS")
+saveRDS(MinData, file = "outputs/narwhal_Minut.RDS")
 # Save reduced data set (selected such that both whales are present
-saveRDS(narwhal[(369254-10000):(369254+10000),], file = "outputs/narwhal_modified_reduced.RDS")
+#saveRDS(narwhal[(369254-10000):(369254+10000),], file = "outputs/narwhal_modified_reduced.RDS")
