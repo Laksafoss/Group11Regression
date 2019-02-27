@@ -56,12 +56,12 @@ As we can not contact the data collectors we have simply assumed that the aforem
 
 
 ##### Aggregrating the data
-We have choosen to aggregrate the data before analyzing it. Below we explain how we have choosen to aggregrate data and here we list our reasons for aggregrating data.
+We have choosen to aggregrate the data before analyzing it. Below we explain how we have chosen to aggregrate data and here we list our reasons for aggregrating data.
 
 * The raw dataset has over a million data lines and fitting models on a dataset of this size is quite computationally heavy and plotting becomes slow.
-* The binary variables `Call`, `Buzz`, `Click` are all recoreded as a time series of signals, that is, most observations are zero and then there are a few ones when a call or buzz starts. As we are not doing time series analysis it will be hard to model the raw signals. Therefor it is convinient to summarize the number of calls, buzz and click over some time interval. 
+* The binary variables `Call`, `Buzz`, `Click` are all recorded as a time series of signals, that is, most observations are zero and then there are a few ones when a call or buzz starts. As we are not doing time series analysis it will be hard to model the raw signals. Therefor it is convenient to summarize the number of calls, buzz and click over some time interval. 
 
-We have choosen to aggregrate data based on a new variable called `Divenumber`. `Divenumber` recoreds when the whale is below 10 meters. When the whale is less then 10 meters below the water surface the `Divenumber` is set to a negarive integer and when it is more then 10 meters from the surface `Divenumber` is set to a positive integer. The integers are choose such that the first time the whale is above 10 meters `Divenumber` is set to -1 and the first time it is below 10 meters `Divenumber` is set to 1. We the count such that the next streach of time near the surface we have `Divenumber = -2` and the next dive period we have `Divenumber = 2` and so on.
+We have chosen to aggregrate data based on a new variable called `Divenumber`. `Divenumber` records when the whale is below 10 meters. When the whale is less then 10 meters below the water surface the `Divenumber` is set to a negative integer and when it is more then 10 meters from the surface `Divenumber` is set to a positive integer. The integers are chosen such that the first time the whale is above 10 meters `Divenumber` is set to -1 and the first time it is below 10 meters `Divenumber` is set to 1. We then count such that the next streach of time near the surface we have `Divenumber = -2` and the next dive period we have `Divenumber = 2` and so on.
 
 Based on this new `Divenumber`variable we have created the following variables
 
@@ -143,3 +143,9 @@ table(narwhal[,c("Ind","Phase")])
 * Make correlation plot
 * Area is likely just a Long and Lat with broader categories
 * Should we use both whales? Given that one of the appears only in some trials 
+
+
+##Time of day factor
+Since the time of day (e.g. morning) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight (since the water temperature might then be higher). Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. 
+
+Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
