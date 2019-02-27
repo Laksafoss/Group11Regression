@@ -1,8 +1,8 @@
-library(ggplot2)
-library(gridExtra)
-library(dplyr)
 library(Hmisc)
 library(corrplot)
+library(gridExtra)
+library(dplyr)
+library(ggplot2)
 narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 # histrogram/Density plots of numerical variables
@@ -14,15 +14,6 @@ numplotslist <- lapply(numnames,
 numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 4, top = "Density plots of numerical variables")
 ggsave(numplots, filename = "figs/numerical_densities.png",device = "png")
 
-# boxplots plots of numerical variables
-numnames <- c("Depth","Dist.to.Paamiut")
-numplotslist <- lapply(numnames,
-                       function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
-                         geom_boxplot())
-numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 4, top = "Density plots of numerical variables")
-numplots
-ggsave(numplots, filename = "figs/numerical_densities.png",device = "png")
-
 # Depth/Timeplot
 
 depthtimeplot <- ggplot(narwhal, aes(x = Datetime)) +
@@ -30,6 +21,17 @@ depthtimeplot <- ggplot(narwhal, aes(x = Datetime)) +
   facet_wrap(c("Ind", "Phase"), labeller = "label_both", scales = "free_x") +
   ggtitle("Depth over time by phase and Ind")
 ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png")
+
+times <- narwhal %>%
+  group_by(Phase, Ind) %>%
+  summarise(start = min(Datetime),
+            end = max(Datetime))
+
+timesNew <- narwhal %>% group_by(Ind, NewPhase) %>%
+  summarise(start = min(Datetime),
+            end = max(Datetime)) %>% 
+  arrange(Ind, start)
+
 
 depthtimeplotPhases <- ggplot(narwhal) +
   geom_rect(
@@ -54,6 +56,19 @@ depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
   ggtitle("Depth over time by Ind, shaded by Phase")
 depthtimeplotPhasesNoB
 ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
+
+
+# Phase and time plots
+
+oldPhasePlot <- ggplot(times, aes(x = Phase, color = Phase)) +
+  geom_linerange(aes(ymin = start, ymax = end), size = 10) +
+  facet_wrap("Ind", nrow = 2) + coord_flip()
+ggsave(oldPhasePlot, filename = "figs/OldPhasePlot.png", device = "png")
+
+newPhasePlot <- ggplot(timesNew, aes(x = NewPhase, color = NewPhase)) +
+  geom_linerange(aes(ymin = start, ymax = end), size = 6) +
+  facet_wrap("Ind", nrow = 2) + coord_flip()
+ggsave(newPhasePlot, filename = "figs/NewPhaseplot.png", device = "png")
 
 # Location plot
 locationplot <- ggplot(narwhal,
