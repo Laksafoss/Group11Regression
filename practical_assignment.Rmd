@@ -37,13 +37,26 @@ In this report we will attempt to understand if the whales are affected by the p
 These variables are all potential response variables or will be used to create response variable. 
 
 ## Data clean up
-Before we can analyse the data we must clean up the data. From the description of the data in the problem description we can make the following initial changes:
+Before we can analyse the data we must clean up the data. The data set contains 1.058.507 data lines over 19 variables. From the description of the data in the problem description we can make the following initial changes:
 
 * Combine `Date` and `Hour` to a new single time object called `Datetime`.
 * Correct for positve `Depths` by substracting maximum value from all values
 * Encode -1 as NA for those variables, where it applies
 
-The data set contains 1.058.507 data lines of which 780.853 data lines has missing values. The variables with missing values are `Dist.to.Paamiut`, `Dist.to.shore`, `ODBA`, `VeDBA`, `Lat`, `Long` and `Strokerate`. To handle the missing values we do the following:
+Furtheremore a closer inspection of the `phase` variable revials that the description of the phase levels does not correspond to the seismic activity. This is allso illustrated in Figur 1 below. As we can not contact the data collectors we have simply assumed that this is a naming error. Hence we have created a new phase variable `Newphase`. **HOW IS NEWPHASE ENCODED** 
+
+**PLOT : PHASE PROBLEMER**
+*Figur 1*: **DESCRIPTION OF PLOT.**
+
+#### Aggregrating the data
+We have choosen to aggregrate the data for the following reasons
+
+* The raw dataset has over a million data lines and fitting models on a dataset of this size is quite computationally heavy and plotting becomes slow.
+* The binary variables `Call`, `Buzz`, `Click` are all recoreded as 
+
+
+
+As the dataset has over a million datalines and 780.853 these have missing values. The variables with missing values are `Dist.to.Paamiut`, `Dist.to.shore`, `ODBA`, `VeDBA`, `Lat`, `Long` and `Strokerate`. To handle the missing values we do the following:
 
 * `Dist.to.Paamiut`: 770.877 missing values. **DESCRIPTION**
 * `Dist.to.shore`: 30.009 missing values. **DESCRIPTION**
