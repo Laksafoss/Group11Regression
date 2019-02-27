@@ -52,30 +52,14 @@ narwhal <- narwhal[-dupsId,]
 narwhal <- rbind(newrows[c(1,3),],narwhal)
 
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
-# Add binary varbiale indicating if both whales are present
-narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
-# max Depth
-DepthCutoff <- -10
-narwhal$Diving <- narwhal$Depth < DepthCutoff
-findDives <- function(Diving) {
-  Diving <- as.vector(Diving)
-  DiveNumber <- 0
-  IsDiving <- Diving[1]
-  Dives <- rep(NA, NROW(Diving))
-  for(i in 1:NROW(Diving)) {
-  if (Diving[i]) {
-    if(!IsDiving) {
-      DiveNumber <- DiveNumber + 1
-      IsDiving <- TRUE
-    }
-    Dives[i] <- DiveNumber 
-  } else {
-    IsDiving <- FALSE
-    }
-  }
-  Dives
-}
-
+## FIX NAs in ODBS Snd VeDBA
+NaODBAVedba <- narwhal %>% filter(is.na(VeDBA) | is.na(ODBA))
+narwhal %>% filter(Ind == "Thor",
+                   between(Datetime,
+                           min(NaODBAVedba$Datetime)-10,
+                           max(NaODBAVedba$Datetime)+10)) %>% arrange(Datetime)
+# They are the first seven observations. Remove them
+narwhal <- narwhal[-(1:7),]
 
 # Save
 narwhal <- narwhal %>% ungroup()
