@@ -50,8 +50,8 @@ Furthermore a closer inspection of the `phase` variable reveals that the naming 
 <div style="text-align:center">
 **PLOT : PHASE PROBLEMER**<br>
 *Figur 1*: **DESCRIPTION OF PLOT.**<br>
-</div>
 We see that if we adjust for the two problems mentioned above, we see that our expectations are met in a third way: between each trial there is an intermediate period.
+</div>
 
 As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable `Newphase`. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. 
 **HOW IS NEWPHASE ENCODED** 
@@ -65,10 +65,10 @@ We have choosen to aggregrate the data before analyzing it. Below we explain how
 
 We have chosen to aggregrate data based on a new variable called `Divenumber`. `Divenumber` records when the whale is below 10 meters. When the whale is less then 10 meters below the water surface the `Divenumber` is set to a negative integer and when it is more then 10 meters from the surface `Divenumber` is set to a positive integer. The integers are chosen such that the first time the whale is above 10 meters `Divenumber` is set to -1 and the first time it is below 10 meters `Divenumber` is set to 1. We then count such that the next streach of time near the surface we have `Divenumber = -2` and the next dive period we have `Divenumber = 2` and so on.
 
-Based on this new `Divenumber`variable we have created the following variables
+Based on this new `Divenumber`variable we have created a new data set. Each line in this new data set corresponds to either the whale diving or the whale being near the surface. The variables in the data set are defined as follows
 
-* `MaxDepth`
-* `NAME` 
+* `MaxDepth` The 
+* `MeanDepth`  
 * `NAME`
 * `NAME`
 
