@@ -388,8 +388,8 @@ $(document).ready(function () {
 <li><code>Strokerate</code>: Strokrate of tail of the whale</li>
 </ul>
 <p>These variables are all potential response variables or will be used to create response variable.</p>
-<div id="data-clean-up" class="section level2">
-<h2>Data clean up</h2>
+<div id="data-clean-up" class="section level1">
+<h1>Data clean up</h1>
 <p>Before we can analyse the data we must clean up the data. The data set contains 1.058.507 data lines over 19 variables. From the description of the data in the problem description we can make the following initial changes:</p>
 <ul>
 <li>Combine <code>Date</code> and <code>Hour</code> to a new single time object called <code>Datetime</code>.</li>
@@ -404,8 +404,8 @@ $(document).ready(function () {
 </div>
 <p>As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable <code>Newphase</code>. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. <strong>HOW IS NEWPHASE ENCODED</strong></p>
 <p>As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitud 70, longitud -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a <code>Sun</code> varibale encoding whether or not the sun was up or down at the time. <br></p>
-<div id="aggregrating-the-data" class="section level5">
-<h5>Aggregrating the data</h5>
+<div id="aggregrating-the-data" class="section level3">
+<h3>Aggregrating the data</h3>
 <p>The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - has more then a million data line - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function <code>find_sub_data</code>, which given a vector of groups will aggregrate data according the groups found in the input vector. The output of this function is then a data frame with 19 variables.</p>
 <pre class="r"><code>find_sub_data &lt;- function(x) {
   X &lt;- narwhal_summarised &lt;- narwhal %&gt;%
@@ -454,7 +454,10 @@ $(document).ready(function () {
 <li><code>Dive</code> logical; whether the whale was diving (diving starts at 10 meters)</li>
 <li><code>Duration</code> numeric; the time diration of the group</li>
 </ul>
-<p><strong>Chosing a vector of groups</strong>: As each data line corresponds to 1 second the first summarizing method the springs to mind, is, simply summarizing every minut or every 10 minuts. Another interesting grouping is based on dives, where we define a dive as the whale being below 10 meters. In this grouping each dive is its own group and each time the whale is near the surface again is also a group.</p>
+<div id="chosing-a-vector-of-groups" class="section level5">
+<h5>Chosing a vector of groups</h5>
+<p>As each data line corresponds to 1 second the first summarizing method the springs to mind, is, simply summarizing every minut or every 10 minuts. Another interesting grouping is based on dives, where we define a dive as the whale being below 10 meters. In this grouping each dive is its own group and each time the whale is near the surface again is also a group.</p>
+<p><strong>WHY ARE THESE DATA GROUPINGS INTERESTING</strong></p>
 </div>
 </div>
 <div id="exploratory-analysis" class="section level2">
@@ -501,6 +504,7 @@ table(narwhal[,c(&quot;Ind&quot;,&quot;Phase&quot;)])</code></pre>
 </ul>
 <p>##Time of day factor Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity.</p>
 <p>Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the &gt;&gt;morning/noon/evening/night&lt;&lt;. We call this variable &gt;&gt;&lt;&lt;….</p>
+</div>
 </div>
 </div>
 
