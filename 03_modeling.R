@@ -26,44 +26,60 @@ n <- dim(x)[1]
 p <- dim(x)[2] - 1
 train.size <- round(n/10)
 train <- sample(1:n,train.size,replace=FALSE)
-test <- setdiff(1:n,train)
-rmse <- function(x,y) sqrt(mean( (x-y)^2 ))
-
-# Depth model
-x.train <- x[train,-which(colnames(x) %in% c("DiveTRUE","Acou.qua"))]
-y.train <- DATA[train, "Depth"]
-fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
-cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = log(cv$lambda.min))
-plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
-which.max(fit$beta[,length(fit$lambda)])
-
-# Click model
-x.train <- x[train, ]
-y.train <- DATA[train, "Click"]
-fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
-cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = log(cv$lambda.min))
-plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
-which.max(fit$beta[,length(fit$lambda)])
 
 
-# Call model
-x.train <- x[train, ]
-y.train <- DATA[train, "Call"]
-fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
-cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = cv$lambda.min)
-plot(fit, xvar = "lambda"); abline(v = cv$lambda.min)
-which.max(fit$beta[,length(fit$lambda)])
+fitter <- function(x, y, train) {
+  x.train <- x[train, ]
+  y.train <- y[train]
+  
+  x.test <- x[-train, ]
+  y.test <- y[-train]
+  
+  fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
+  cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
+  rmse <- sqrt(mean((predict(fit, newx = x.test, s = cv$lambda.min) - y.test)^2))
+  return(structure(list(fit = fit, cv = cv, rmse = rmse), class = "fitterglm"))
+}
+
+plot.fitterglm <- function(x) {
+  par(mfrow=c(2,1))
+  plot(x$fit, xvar = "lambda"); abline(v = log(x$cv$lambda.min))
+  plot(x$cv); abline(v = log(x$cv$lambda.min))
+  par(mfrow=c(1,1))
+}
 
 
+# Depth model ------------------------------------------------------------------
+no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
+fit.depth <- fitter(x[,-no], DATA$Depth, train)
+plot(fit.depth)
 
-# Strokerate model
-x.train <- x[train,-which(colnames(x) %in% c("DiveTRUE","Acou.qua"))]
-y.train <- DATA[train, "StrokeRate"]
-fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
-cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = log(cv$lambda.min))
-plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
-which.max(fit$beta[,length(fit$lambda)])
+fit.depth.sub <- fitter(xsub[,-no], DATA$Depth, train)
+plot(fit.depth.sub)
+
+
+# Click model ------------------------------------------------------------------
+fit.click <- fitter(x, DATA$Click, train)
+plot(fit.click)
+
+fit.click.sub <- fitter(xsub, DATA$Click, train)
+plot(fit.click.sub)
+
+
+# Call model -------------------------------------------------------------------
+fit.call <- fitter(x, DATA$Call, train)
+plot(fit.call)
+
+fit.call.sub <- fitter(xsub, DATA$Call, train)
+plot(fit.call.sub)
+
+
+# Strokerate model -------------------------------------------------------------
+no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
+fit.strokerate <- fitter(x[,-no], DATA$StrokeRate, train)
+plot(fit.strokerate)
+
+fit.strokerate.sub <- fitter(xsub[,-no], DATA$StrokeRate, train)
+plot(fit.strokerate.sub)
+
+
