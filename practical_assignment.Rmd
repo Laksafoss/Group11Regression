@@ -212,6 +212,16 @@ table(narwhal[,c("Ind","Phase")])
 ```
 
 
+Depth and phases:
+
+By plotting the depth over time - colored according to phases - we see that the whales do a lot of short dives, and some very deep dives. We judge that there is no clear trend in time, nor any clear effect of the different phases. Considering the B phase as a control phase, there is also no clear difference before and during the experiments.
+
+![](figs/depthtimeplotPhases.png)
+
+![](figs/depthtimeplotPhasesNoB.png)
+
+
+
 
 
 ### Ideas/Thoughts
