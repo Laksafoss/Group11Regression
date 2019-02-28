@@ -4,9 +4,11 @@ library(ggplot2)
 library(gridExtra)
 
 #DATA <- readRDS("outputs/narwhal.RDS")
-#DATA <- readRDS("outputs/narwhal_Minut.RDS")
-DATA <- readRDS("outputs/narwhal_TenMinut.RDS")
+DATA <- readRDS("outputs/narwhal_Minut.RDS")
+#DATA <- readRDS("outputs/narwhal_TenMinut.RDS")
 #DATA <- readRDS("outputs/narwhal_Diving.RDS")
+
+DATA <- DATA[complete.cases(DATA),]
 
 
 # if the factor is order the model matrix uses polynomials - not what we want !
@@ -78,10 +80,10 @@ residualplotter <- function(fit, n, m) {
 
 # Ridge regression
 no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
-fit.depth <- fitter(x[,-no], DATA$Depth, train)
+fit.depth <- netfitter(x[,-no], DATA$Depth, train)
 plot(fit.depth)
 
-fit.depth.sub <- fitter(xsub[,-no], DATA$Depth, train)
+fit.depth.sub <- netfitter(xsub[,-no], DATA$Depth, train)
 plot(fit.depth.sub)
 
 # normal regression
@@ -158,5 +160,5 @@ fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA,
 anova(fit.strokerate, fit.strokerate.sub, test = "LRT") # Likelihood ratio test
 anova(fit.strokerate, fit.strokerate.sub, test = "Cp")  # like AIC
 
-residualplotter(fit.strakerate, 3,3)
-residualplotter(fit.strakerate.sub, 3,3)
+residualplotter(fit.strokerate, 3,3)
+residualplotter(fit.strokerate.sub, 3,3)
