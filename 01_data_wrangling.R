@@ -52,6 +52,7 @@ narwhal <- narwhal[-dupsId,]
 narwhal <- rbind(newrows[c(1,3),],narwhal)
 
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
+
 ## FIX NAs in ODBS Snd VeDBA
 NaODBAVedba <- narwhal %>% filter(is.na(VeDBA) | is.na(ODBA))
 narwhal %>% filter(Ind == "Thor",
