@@ -4,8 +4,10 @@ library(dplyr)
 library(Hmisc)
 library(corrplot)
 library(UpSetR)
+library(naniar)
+library(lubridate)
 
-narwhal <- readRDS(file = "outputs/narwhal.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 #Combinations of missing values plots
 gg_miss_upset(narwhal)
@@ -31,6 +33,15 @@ pctT<-round((H-G)/H*100,2)
 
 
 #Table for above percentages
+a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
+png(filename = "PercentageTable.png")
+grid.table(a) 
+dev.off()
+
+#Table for mean dist in phases
+b<- sapply(levels(narwhal$Phase), function(x) mean(narwhal$Dist.to.Paamiut[!is.na(narwhal$Dist.to.Paamiut) & narwhal$Ind == "Helge" & narwhal$Phase == x]))
+b
+
 a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
 png(filename = "PercentageTable.png")
 grid.table(a) 
@@ -68,6 +79,17 @@ summary(narwhal)
 
 ggplot(narwhal, aes(Phase, Datetime, group = Ind) ) + geom_point()
 
-sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
 
+#Phase = Seismik
+sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x & narwhal$Ind == "Helge"]))
+
+
+#Length of Phases in seconds
+sapply(levels(narwhal$Phase), function (x) 
+            difftime(max(narwhal$Datetime[narwhal$Phase == x & narwhal$Ind == "Helge"]),
+         min(narwhal$Datetime[narwhal$Phase == x & narwhal$Ind == "Helge"]), units = "secs"))
+
+
+
+plot(narwhal$Datetime[narwhal$Phase == "T2"], narwhal$Seismik[narwhal$Phase == "T2"])
 
