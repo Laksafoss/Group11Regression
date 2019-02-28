@@ -176,6 +176,22 @@ summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buz
 summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
 
+A correlation plot for the categorical variables gives the impression that there is no extreme correlation betwwen the categorical variables:
+
+![](figs/correlationmatrix.png)
+
+Therefore the above plot does not force us to disregard any of the variables.
+
+However, a closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated. Indeed, we see that
+
+```{r}
+sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
+```
+
+Hence `Seismik` is completely determined by `Phase`.
+
+
+
 
 ### The numeric explanatory variables
 ```{r sum_num_explanatory}
