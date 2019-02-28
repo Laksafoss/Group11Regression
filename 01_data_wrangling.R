@@ -53,6 +53,7 @@ narwhal <- rbind(newrows[c(1,3),],narwhal)
 
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
 
+
 ## FIX NAs in ODBS Snd VeDBA
 NaODBAVedba <- narwhal %>% filter(is.na(VeDBA) | is.na(ODBA))
 narwhal %>% filter(Ind == "Thor",
@@ -91,10 +92,9 @@ find_sub_data <- function(x) {
     )
   X <- X[ ,-1]
   X$Dive <- X$Depth > 10
+  X$Duration <- as.numeric(X$End - X$Start)
   return(X)
 }
-
-
 
 
 ## TIME OF DAY ANALYSIS ========================================================
@@ -118,57 +118,6 @@ narwhal$Diving <- create_dive_cut(10)
 Diving10Data <- find_sub_data("Diving")
 
 
-
-# DepthCutoff <- 10
-# narwhal$Diving <- narwhal$Depth > DepthCutoff
-# findDives <- function(Diving) {
-#   Diving <- as.vector(Diving)
-#   DiveNumber <- 0
-#   IsDiving <- Diving[1]
-#   Dives <- rep(NA, NROW(Diving))
-#   for(i in 1:NROW(Diving)) {
-#   if (Diving[i]) {
-#     if(!IsDiving) {
-#       DiveNumber <- DiveNumber + 1
-#       IsDiving <- TRUE
-#     }
-#     Dives[i] <- DiveNumber 
-#   } else {
-#     IsDiving <- FALSE
-#     }
-#   }
-#   Dives
-# }
-
-
-# narwhal <- narwhal %>% 
-#   group_by(Ind) %>% 
-#   arrange(Datetime) %>% 
-#   mutate(DiveNumber = findDives(Diving))
-# narwhal <- narwhal %>% 
-#   group_by(Ind, DiveNumber) %>% 
-#   mutate(DiveDepth = ifelse(is.na(DiveNumber),NA,min(Depth))) %>% 
-#   arrange(Ind, Datetime)
-# 
-# narwhal_summarised <- narwhal %>%
-#   group_by(Ind, DiveNumber) %>%
-#   summarise(MaxDepth = max(Depth, na.rm = T),
-#             MeanDepth = mean(Depth, na.rm = T),
-#             DatetimeStart = min(Datetime, na.rm = T),
-#             DiveEnd = max(Datetime, na.rm = T),
-#             CallsSum = sum(as.numeric(Call), na.rm = T),
-#             BuzzSum = sum(as.numeric(Call), na.rm = T),
-#             ODBAMax = max(ODBA, na.rm = T),
-#             ODBAMean = mean(ODBA, na.rm = T),
-#             VeDBA = max(VeDBA, na.rm = T),
-#             VeDBAMean = mean(VeDBA, na.rm = T),
-#             StrokeRateMax = max(Strokerate, na.rm = T),
-#             StrokeRateMean = mean(Strokerate, na.rm = T),
-#             Dist.to.shoreMax = max(Dist.to.shore, na.rm = T),
-#             Dist.to.shoreMean = mean(Dist.to.shore, na.rm = T),
-#             Dist.to.PaamiutMax = max(Dist.to.Paamiut, na.rm = T),
-#             Dist.to.PaamiutMean = mean(Dist.to.Paamiut, na.rm = T)
-# )
 
 ## ==  STEP 3 : EXPORT EVERYTHING  =============================================
 saveRDS(narwhal, file = "outputs/narwhal_modified.RDS")
