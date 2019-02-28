@@ -14,8 +14,9 @@ png(filename = "figs/Missing_Values_Overview.png")
 gg_miss_upset(narwhal)
 dev.off()
 
+udenD <- within(narwhal, rm(Dist.to.Paamiut))
 png(filename = "figs/Missing_values_phase.png")
-gg_miss_var(narwhal, facet = Phase)
+gg_miss_var(udenD, facet = Phase)
 dev.off()
 
 # Percentage of existing Dist.to.Paamiut observatons for Helge for each phase
