@@ -388,8 +388,8 @@ $(document).ready(function () {
 <li><code>Strokerate</code>: Strokrate of tail of the whale</li>
 </ul>
 <p>These variables are all potential response variables or will be used to create response variable.</p>
-<div id="data-clean-up" class="section level2">
-<h2>Data clean up</h2>
+<div id="data-clean-up" class="section level1">
+<h1>Data clean up</h1>
 <p>Before we can analyse the data we must clean up the data. The data set contains 1.058.507 data lines over 19 variables. From the description of the data in the problem description we can make the following initial changes:</p>
 <ul>
 <li>Combine <code>Date</code> and <code>Hour</code> to a new single time object called <code>Datetime</code>.</li>
@@ -397,35 +397,67 @@ $(document).ready(function () {
 <li>Encode -1 as NA for those variables, where it applies</li>
 </ul>
 <p>We found 8 pairs of duplicat data lines, where the <code>Datetime</code> and <code>Ind</code> (whale name) were recoreded twice. To deal with this we simply average the duplicat pairs of data lines.</p>
+<p>In the data for the whale Thor the first 587 <strong>INSERT CORRECT NUMBER</strong> lines have many <code>NA</code>’s. Therefor we assumed that this is because the explerimates were to popery started and we have simply removed these data line.</p>
 <p>Furthermore a closer inspection of the <code>phase</code> variable reveals that the naming of the different levels of the variable does not correspond to description of the variable. Specifically, the Trial and Intermediate indicators (“Tx” and “Ix”) in the name of the levels does not correspond to the expected seismic activity (1 and 0 respectively). Further, the ordinal part of the name of the variables (0 through 5) does not correspond to the expected time of measurement - that is, we expect T2 to be conducted before T3, but this is not the case in the data. This is allso illustrated in Figur 1 below.</p>
-<p><strong>PLOT : PHASE PROBLEMER</strong> <em>Figur 1</em>: <strong>DESCRIPTION OF PLOT.</strong> We see that if we adjust for the two problems mentioned above, we see that our expectations are met in a third way: between each trial there is an intermediate period.</p>
+<div style="text-align:center">
+<p><strong>PLOT : PHASE PROBLEMER</strong><br> <em>Figur 1</em>: <strong>DESCRIPTION OF PLOT.</strong><br> We see that if we adjust for the two problems mentioned above, we see that our expectations are met in a third way: between each trial there is an intermediate period.</p>
+</div>
 <p>As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable <code>Newphase</code>. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. <strong>HOW IS NEWPHASE ENCODED</strong></p>
-<div id="aggregrating-the-data" class="section level5">
-<h5>Aggregrating the data</h5>
-<p>We have choosen to aggregrate the data before analyzing it. Below we explain how we have choosen to aggregrate data and here we list our reasons for aggregrating data.</p>
+<p>As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitud 70, longitud -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a <code>Sun</code> varibale encoding whether or not the sun was up or down at the time. <br></p>
+<div id="aggregrating-the-data" class="section level3">
+<h3>Aggregrating the data</h3>
+<p>The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - has more then a million data line - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function <code>find_sub_data</code>, which given a vector of groups will aggregrate data according the groups found in the input vector. The output of this function is then a data frame with 19 variables.</p>
+<pre class="r"><code>find_sub_data &lt;- function(x) {
+  X &lt;- narwhal_summarised &lt;- narwhal %&gt;%
+    group_by((!!as.name(x)), Ind) %&gt;%
+    summarise(Start = min(Datetime, na.rm = T),
+              End = max(Datetime, na.rm = T),
+              Depth = mean(Depth, na.rm = T),
+              Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
+              Phase = first(NewPhase),
+              Area = first(Area),
+              Call = mean(as.numeric(Call) - 1, na.rm = T),
+              Acou.qua = mean(as.numeric(Acou.qua) - 1, na.rm = T),
+              Dist.to.Paamiut = mean(Dist.to.Paamiut, na.rm = T),
+              Dist.to.shore = mean(Dist.to.shore),
+              Click = mean(as.numeric(Click) - 1, na.rm = T),
+              Buzz = mean(as.numeric(Call) - 1, na.rm = T),
+              ODBA = mean(ODBA, na.rm = T),
+              StrokeRate = mean(Strokerate, na.rm = T),
+              Los = first(Los),
+              Sun = first(Sun)
+    )
+  X &lt;- X[ ,-1]
+  X$Dive &lt;- X$Depth &gt; 10
+  X$Duration &lt;- as.numeric(X$End - X$Start)
+  return(X)
+}</code></pre>
+<p>We can then interpret the new variables formed by a vector of groups in the following way</p>
 <ul>
-<li>The raw dataset has over a million data lines and fitting models on a dataset of this size is quite computationally heavy and plotting becomes slow.</li>
-<li>The binary variables <code>Call</code>, <code>Buzz</code>, <code>Click</code> are all recoreded as a time series of signals, that is, most observations are zero and then there are a few ones when a call or buzz starts. As we are not doing time series analysis it will be hard to model the raw signals. Therefor it is convinient to summarize the number of calls, buzz and click over some time interval.</li>
+<li><code>Ind</code>; factor; whale name</li>
+<li><code>Start</code> date time; first time point in the group</li>
+<li><code>End</code> date time; last time point in the group</li>
+<li><code>Depth</code> numeric; average depth</li>
+<li><code>Seismik</code> numeric; average number of seismic activity pr second</li>
+<li><code>Phase</code> factor; phase of the first observation</li>
+<li><code>Area</code> factor; area of the first observation</li>
+<li><code>Call</code> numeric; average number of calls pr second</li>
+<li><code>Acou.qua</code> numeric; the average acoustic quality</li>
+<li><code>Dist.to.Paamiut</code> numeric; average distance to Paamiut</li>
+<li><code>Dist.to.shore</code> numeric; average distance between the whale and the shor</li>
+<li><code>Click</code> numeric; average number of clicks pr second</li>
+<li><code>Buzz</code> numeric; avrage number of buzz’s pr second</li>
+<li><code>ODBA</code> numeric; average overall dynamic body acceleration</li>
+<li><code>StrokeRate</code> numeric; average stroke rate</li>
+<li><code>Los</code> factor; whether the whale was in the line of sight in the first observation</li>
+<li><code>Sun</code> factor; whether the sun was up or down at this time point</li>
+<li><code>Dive</code> logical; whether the whale was diving (diving starts at 10 meters)</li>
+<li><code>Duration</code> numeric; the time diration of the group</li>
 </ul>
-<p>We have choosen to aggregrate data based on a new variable called <code>Divenumber</code>. <code>Divenumber</code> recoreds when the whale is below 10 meters. When the whale is less then 10 meters below the water surface the <code>Divenumber</code> is set to a negarive integer and when it is more then 10 meters from the surface <code>Divenumber</code> is set to a positive integer. The integers are choose such that the first time the whale is above 10 meters <code>Divenumber</code> is set to -1 and the first time it is below 10 meters <code>Divenumber</code> is set to 1. We the count such that the next streach of time near the surface we have <code>Divenumber = -2</code> and the next dive period we have <code>Divenumber = 2</code> and so on.</p>
-<p>Based on this new <code>Divenumber</code>variable we have created the following variables</p>
-<ul>
-<li><code>MaxDepth</code></li>
-<li><code>NAME</code></li>
-<li><code>NAME</code></li>
-<li><code>NAME</code></li>
-</ul>
-<hr />
-<hr />
-<p>As the dataset has over a million datalines and 780.853 these have missing values. The variables with missing values are <code>Dist.to.Paamiut</code>, <code>Dist.to.shore</code>, <code>ODBA</code>, <code>VeDBA</code>, <code>Lat</code>, <code>Long</code> and <code>Strokerate</code>. To handle the missing values we do the following:</p>
-<ul>
-<li><code>Dist.to.Paamiut</code>: 770.877 missing values. <strong>DESCRIPTION</strong></li>
-<li><code>Dist.to.shore</code>: 30.009 missing values. <strong>DESCRIPTION</strong></li>
-<li><code>ODBA</code> and <code>VeDBA</code>: 7 missing values. <strong>DESCRIPTION</strong></li>
-<li><code>Lat</code> and <code>Long</code>: 10.882 missing values. <strong>DESCRIPTION</strong></li>
-<li><code>Strokerate</code>: 693 missing values. <strong>DESCRIPTION</strong></li>
-</ul>
-<p>Lastly there are a few issues of duplicate data lines. <strong>WHICH ONES AND WHAT DID WE DO</strong></p>
+<div id="chosing-a-vector-of-groups" class="section level5">
+<h5>Chosing a vector of groups</h5>
+<p>As each data line corresponds to 1 second the first summarizing method the springs to mind, is, simply summarizing every minut or every 10 minuts. Another interesting grouping is based on dives, where we define a dive as the whale being below 10 meters. In this grouping each dive is its own group and each time the whale is near the surface again is also a group.</p>
+<p><strong>WHY ARE THESE DATA GROUPINGS INTERESTING</strong></p>
 </div>
 </div>
 <div id="exploratory-analysis" class="section level2">
@@ -470,6 +502,9 @@ table(narwhal[,c(&quot;Ind&quot;,&quot;Phase&quot;)])</code></pre>
 <li>Area is likely just a Long and Lat with broader categories</li>
 <li>Should we use both whales? Given that one of the appears only in some trials</li>
 </ul>
+<p>##Time of day factor Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity.</p>
+<p>Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the &gt;&gt;morning/noon/evening/night&lt;&lt;. We call this variable &gt;&gt;&lt;&lt;….</p>
+</div>
 </div>
 </div>
 
