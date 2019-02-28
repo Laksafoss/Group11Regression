@@ -1,9 +1,11 @@
 ---
 title: "Regression"
-author: "Anders Christensen, Anna Damkjær Laksafoss and Stefan Bruhn Rasmussen"
+author: "Anders Christensen, Anna DamkjÃ¦r Laksafoss and Stefan Bruhn Rasmussen"
 date: "February 21, 2019"
-output: html_document
-editor_options: 
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -67,9 +69,9 @@ row_spec(9:12,background = "#fca9b6")
 
 
 
-In the data for the whale Thor the first 587 **INSERT CORRECT NUMBER** lines have many `NA`'s. Therefor  we assumed that this is because the explerimates were to popery started and we have simply removed these data line. 
+In the data for the whale Thor the first 587 **INSERT CORRECT NUMBER** lines have many `NA`'s. Therefore  we assumed that this is because the experiments were not yet properly started and we have simply removed these data lines. 
 
-Furthermore a closer inspection of the `phase` variable reveals that the naming of the different levels of the variable does not correspond to description of the variable. Specifically, the Trial and Intermediate indicators ("Tx" and "Ix") in the name of the levels does not correspond to the expected seismic activity (1 and 0 respectively). Further, the ordinal part of the name of the variables (0 through 5) does not correspond to the expected time of measurement - that is, we expect T2 to be conducted before T3, but this is not the case in the data. This is allso illustrated in Figur 1 below. 
+**Dette skal slettes** Furthermore a closer inspection of the `phase` variable reveals that the naming of the different levels of the variable does not correspond to description of the variable. Specifically, the Trial and Intermediate indicators ("Tx" and "Ix") in the name of the levels does not correspond to the expected seismic activity (1 and 0 respectively). Further, the ordinal part of the name of the variables (0 through 5) does not correspond to the expected time of measurement - that is, we expect T2 to be conducted before T3, but this is not the case in the data. This is allso illustrated in Figur 1 below. 
 
 <div style="text-align:center">
 **PLOT : PHASE PROBLEMER**<br>
@@ -79,13 +81,13 @@ We see that if we adjust for the two problems mentioned above, we see that our e
 
 
 As we can not contact the data collectors we have simply assumed that the aforementioned problems are caused by a naming error. Hence we have created a new phase variable `Newphase`. This variables correctly encodes whether we are in a trial or intermediate period, and the following number is ordinal. 
-**HOW IS NEWPHASE ENCODED** 
+**Slettes herned til** 
 
-As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitud 70, longitud -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` varibale encoding whether or not the sun was up or down at the time. <br>
+As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` varibale encoding whether or not the sun was up or down at the time. <br>
 
 
 ### Aggregrating the data
-The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - has more then a million data line - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function `find_sub_data`, which given a vector of groups will aggregrate data according the groups found in the input vector. The output of this function is then a data frame with 19 variables. 
+The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - it has more then a million data lines - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function `find_sub_data`, which given a vector of groups will aggregrate data according to the groups found in the input vector. The output of this function is then a data frame with 19 variables. 
 
 ```{r find_sub_data, eval = FALSE}
 find_sub_data <- function(x) {
@@ -95,7 +97,7 @@ find_sub_data <- function(x) {
               End = max(Datetime, na.rm = T),
               Depth = mean(Depth, na.rm = T),
               Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
-              Phase = first(NewPhase),
+              Phase = first(Phase),
               Area = first(Area),
               Call = mean(as.numeric(Call) - 1, na.rm = T),
               Acou.qua = mean(as.numeric(Acou.qua) - 1, na.rm = T),
@@ -140,7 +142,7 @@ We can then interpret the new variables formed by a vector of groups in the foll
 
 
 ##### Chosing a vector of groups
-As each data line corresponds to 1 second the first summarizing method the springs to mind, is, simply summarizing every minut or every 10 minuts. Another interesting grouping is based on dives, where we define a dive as the whale being below 10 meters. In this grouping each dive is its own group and each time the whale is near the surface again is also a group.
+As each data line corresponds to 1 second the first summarizing method that springs to mind, is simply summarizing every minute or every 10 minutes. Another interesting grouping is based on dives, where we define a dive as the whale being below 10 meters. In this grouping each dive is its own group and each time the whale is near the surface again is also a group.
 
 **WHY ARE THESE DATA GROUPINGS INTERESTING**
 
@@ -214,3 +216,23 @@ Therefore we construct a factor variable with four levels indicating whether the
 
 
 ## Appendix
+
+
+#Missing values
+As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+![](figs/Missing_Values_Overview.png)
+
+We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
+
+![](figs/Missing_values_phase.png)
+
+We see that none of the variables used in the model are missing.
+
+Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
+
+![](PercentageTable.png)
+
+We see that except for the B phase, there is no clear tendency as to when values are present or not.
+**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
+
+
