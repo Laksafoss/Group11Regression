@@ -10,16 +10,13 @@ library(lubridate)
 narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 #Combinations of missing values plots
+png(filename = "figs/Missing_Values_Overview.png")
 gg_miss_upset(narwhal)
-gg_miss_upset(narwhal, nsets = n_var_miss(narwhal))
+dev.off()
 
+png(filename = "figs/Missing_values_phase.png")
 gg_miss_var(narwhal, facet = Phase)
-
-
-summary(narwhal$Dist.to.Paamiut[narwhal$Phase=="B"])
-A <- summary(narwhal$Phase[!is.na(narwhal$Dist.to.Paamiut)])
-B <- summary(narwhal$Phase)
-(B-A)/B*100
+dev.off()
 
 # Percentage of existing Dist.to.Paamiut observatons for Helge for each phase
 C <- summary(narwhal$Phase[is.na(narwhal$Dist.to.Paamiut) & narwhal$Ind == "Helge"])
@@ -34,18 +31,13 @@ pctT<-round((H-G)/H*100,2)
 
 #Table for above percentages
 a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
-png(filename = "PercentageTable.png")
+png(filename = "figs/PercentageTable.png")
 grid.table(a) 
 dev.off()
 
 #Table for mean dist in phases
 b<- sapply(levels(narwhal$Phase), function(x) mean(narwhal$Dist.to.Paamiut[!is.na(narwhal$Dist.to.Paamiut) & narwhal$Ind == "Helge" & narwhal$Phase == x]))
 b
-
-a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
-png(filename = "PercentageTable.png")
-grid.table(a) 
-dev.off()
 
 
 #Is at least one whale in LOS for non-missing values of dist
@@ -77,7 +69,7 @@ summary(narwhal$Datetime[narwhal$Phase == "T5"])
 difftime("2017-08-11 12:22:00", "2017-08-19 11:49:26")
 summary(narwhal)
 
-ggplot(narwhal, aes(Phase, Datetime, group = Ind) ) + geom_point()
+#ggplot(narwhal, aes(Phase, Datetime, group = Ind) ) + geom_point()
 
 
 #Phase = Seismik
