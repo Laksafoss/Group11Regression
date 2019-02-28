@@ -19,9 +19,9 @@ ggsave(numplots, filename = "figs/numerical_densities.png",device = "png")
 # Depth/Timeplot
 
 depthtimeplot <- ggplot(narwhal, aes(x = Datetime)) +
-  geom_line(aes(y = Depth)) +
+  geom_line(aes(y = -Depth)) +
   facet_wrap(c("Ind", "Phase"), labeller = "label_both", scales = "free_x") +
-  ggtitle("Depth over time by phase and Ind")
+  ggtitle("Depth over time by phase and Ind") + ylab("Depth")
 ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png")
 
 times <- narwhal %>%
@@ -32,24 +32,24 @@ times <- narwhal %>%
 depthtimeplotPhases <- ggplot(narwhal) +
   geom_rect(
     aes(x = NULL ,xmin = start, xmax = end, fill = Phase),
-    ymin = -Inf, ymax = Inf, alpha = 0.5,
+    ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times
   ) + 
-  geom_line(aes(x = Datetime, y = Depth), size = 0.3) +
+  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
   facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
-  ggtitle("Depth over time by Ind, shaded by Phase")
+  ggtitle("Depth over time by Ind, shaded by Phase") + ylab("Depth")
 
 ggsave(depthtimeplotPhases, filename = "figs/depthtimeplotPhases.png", device = "png")
 
 depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
   geom_rect(
     aes(x = NULL ,xmin = start, xmax = end, fill = Phase),
-    ymin = -Inf, ymax = Inf, alpha = 0.5,
+    ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times[times$Phase != "B",]
   ) + 
-  geom_line(aes(x = Datetime, y = Depth), size = 0.3) +
+  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
   facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
-  ggtitle("Depth over time by Ind, shaded by Phase without the B-Phase")
+  ggtitle("Depth over time by Ind, shaded by Phase without the B-Phase")+ ylab("Depth")
 depthtimeplotPhasesNoB
 
 ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
@@ -57,11 +57,11 @@ ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", dev
 depthtimeplotPhasesNoBHelge <- ggplot(narwhal[narwhal$Ind == "Helge" & narwhal$Phase != "B",]) +
   geom_rect(
     aes(x = NULL ,xmin = start, xmax = end, fill = Phase),
-    ymin = -Inf, ymax = Inf, alpha = 0.5,
+    ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times[times$Phase != "B",]
   ) + 
-  geom_line(aes(x = Datetime, y = Depth), size = 0.3) +
-  ggtitle("Helges Depth over time after B-Phase, shaded by Phase")
+  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
+  ggtitle("Helges Depth over time after B-Phase, shaded by Phase") + ylab("Depth")
 
 ggsave(depthtimeplotPhasesNoBHelge, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
 
@@ -70,17 +70,8 @@ ggsave(depthtimeplotPhasesNoBHelge, filename = "figs/depthtimeplotPhasesNoB.png"
 PhasePlot <- ggplot(times, aes(x = Phase, color = Phase)) +
   geom_linerange(aes(ymin = start, ymax = end), size = 10) +
   facet_wrap("Ind", nrow = 2) + coord_flip()
-ggsave(PhasePlot, filename = "figs/OldPhasePlot.png", device = "png")
+ggsave(PhasePlot, filename = "figs/PhasePlot.png", device = "png")
 
-
-#NewPhase data + plot
-narwhal$NewPhase <- narwhal$Phase
-narwhal$NewPhase <- mapvalues(narwhal$NewPhase, c("B", "I0", "I3", "T0", "T3", "I1","I4","T1","T4","I2","I5","T2","T5"), 
-          c("B","I0","T0","I1","T1","I2","T2","I3","T3","I4","T4","I5","T5"))
-narwhal$NewPhase <- ordered(narwhal$NewPhase, levels = c("B","I0","T0","I1","T1","I2","T2","I3","T3","I4","T4","I5","T5"))
-NewPhasePlot <- ggplot(narwhal, aes(Datetime, NewPhase)) +   
-  geom_line() + facet_wrap("Ind", nrow = 2) + coord_flip()
-ggsave(NewPhasePlot, filename = "figs/NewPhasePlot.png", device = "png")
 
 
 # Location plot
