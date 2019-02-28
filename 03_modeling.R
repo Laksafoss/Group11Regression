@@ -34,8 +34,8 @@ x.train <- x[train,-which(colnames(x) %in% c("DiveTRUE","Acou.qua"))]
 y.train <- DATA[train, "Depth"]
 fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
 cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = cv$lambda.min)
-plot(fit, xvar = "lambda"); abline(v = cv$lambda.min)
+plot(cv); abline(v = log(cv$lambda.min))
+plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
 which.max(fit$beta[,length(fit$lambda)])
 
 # Click model
@@ -43,8 +43,8 @@ x.train <- x[train, ]
 y.train <- DATA[train, "Click"]
 fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
 cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = cv$lambda.min)
-plot(fit, xvar = "lambda"); abline(v = cv$lambda.min)
+plot(cv); abline(v = log(cv$lambda.min))
+plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
 which.max(fit$beta[,length(fit$lambda)])
 
 
@@ -64,6 +64,6 @@ x.train <- x[train,-which(colnames(x) %in% c("DiveTRUE","Acou.qua"))]
 y.train <- DATA[train, "StrokeRate"]
 fit <- glmnet(x.train, y.train, family = "poisson", alpha = 0)
 cv <- cv.glmnet(x.train, y.train, family = "poisson", alpha = 0)
-plot(cv); abline(v = cv$lambda.min)
-plot(fit, xvar = "lambda"); abline(v = cv$lambda.min)
+plot(cv); abline(v = log(cv$lambda.min))
+plot(fit, xvar = "lambda"); abline(v = log(cv$lambda.min))
 which.max(fit$beta[,length(fit$lambda)])
