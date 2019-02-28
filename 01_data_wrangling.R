@@ -75,7 +75,7 @@ find_sub_data <- function(x) {
               End = max(Datetime, na.rm = T),
               Depth = mean(Depth, na.rm = T),
               Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
-              Phase = first(NewPhase),
+              Phase = first(Phase),
               Area = first(Area),
               Call = mean(as.numeric(Call), na.rm = T),
               Acou.qua = first(Acou.qua),
