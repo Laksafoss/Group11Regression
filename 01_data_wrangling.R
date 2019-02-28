@@ -53,7 +53,7 @@ narwhal <- rbind(newrows[c(1,3),],narwhal)
 
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
 # Add binary varbiale indicating if both whales are present
-narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
+#narwhal <- narwhal %>% group_by(Datetime) %>% mutate(BothWhales = all(c("Helge","Thor") %in% Ind))
 # max Depth
 DepthCutoff <- -10
 narwhal$Diving <- narwhal$Depth < DepthCutoff
@@ -91,7 +91,7 @@ find_sub_data <- function(x) {
               End = max(Datetime, na.rm = T),
               Depth = mean(Depth, na.rm = T),
               Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
-              Phase = first(NewPhase),
+              Phase = first(Phase),
               Area = first(Area),
               Call = mean(as.numeric(Call), na.rm = T),
               Acou.qua = first(Acou.qua),
