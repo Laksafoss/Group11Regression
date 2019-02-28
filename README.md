@@ -14,7 +14,7 @@ Only the Phase variable is of interest the rest is for adjustment
 - [ ] Click
 - [ ] Call
 - [ ] Strokerate
-- [ ] Phase  -- > can be tested  
+- [ ] Phase  -- > seismik is a subfactor
 - [ ] Area
 - [ ] Ind
 - [ ] Los
