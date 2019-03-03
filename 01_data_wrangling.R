@@ -70,6 +70,13 @@ NaStroke <- narwhal %>% mutate(index = 1:NROW(narwhal)) %>%
             end = max(Datetime),
             duration = n())
 NaStrokeDF <- data.frame(NaStroke)
+fullDF <- data.frame(Ind = c("Thor","Helge"),
+                     start = c(min(narwhal[narwhal$Ind == "Thor","Datetime"]),
+                               min(narwhal[narwhal$Ind == "Helge","Datetime"])),
+                     end = c(max(narwhal[narwhal$Ind == "Thor","Datetime"]),
+                             max(narwhal[narwhal$Ind == "Helge","Datetime"])),
+                     duration = c(NA,NA))
+NaStrokeDF <- rbind(NAStrokeDf[,2:5], fullDF)
 saveRDS(NaStrokeDF, file = "outputs/NAStrokeDf.RDS")
 
 narwhal <- narwhal %>% filter(!is.na(Strokerate))

@@ -71,11 +71,14 @@ Examing `Strokerate` after these operations shows that it has 686 NA values. The
 
 ```{r, echo=FALSE}
 NAStrokeDf <- readRDS("outputs/NAStrokeDf.RDS")
-kable(NAStrokeDf[,2:5]) %>% 
-  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+kable(NAStrokeDf) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>%
+  group_rows("NA intervals", 1, 3) %>% 
+  group_rows("Time range for whole experiment", 4, 5) 
 ```
 
-We see that all these NAs are either in the first or last measurements for each whale. We assume that this is because the experiments were not yet properly started and we have simply remove these data lines as they are a very small fraction of the full data set. 
+We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full dataset we simply remove them.
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
 
 ### NAs in `Dist.to.Paamiut`
@@ -163,8 +166,15 @@ We note that
 * `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
 * `Strokerate` are positive and the plot is "jagged" because it is integers only.
 
-* `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set. *NEEDS CALULATION*
-* `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
+We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as they are all measurements of movement speed. We plot the spearman correlations:
+
+![](figs/correlationmatrixnum.png){width=500px}
+
+Which unsurprisingly shows nearly perfect positive correlation between `ODBA` and`VeDBA`. It also shows a weak positive correlation between `Strokerate` and `ODBA`, `VeDBA`.
+
+```{r include=FALSE}
+# * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
+```
 
 ### The categorical explanatory variables
 ```{r sum_cat_explanatory}
@@ -174,7 +184,7 @@ summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 We note that
 
 * We have more observations on the whale "Helge" than on "Thor"
-* `Acou.qua` are almost always "G"
+* `Acou.qua` are almost always "G".
 A correlation plot for the categorical variables gives the impression that there is no extreme correlation betwwen the categorical variables:
 
 ![](figs/correlationmatrix.png)

@@ -166,6 +166,17 @@ ggsave(locationplotPhaseNoBNoHelge, filename = "figs/locationplotPhasenoBNH.png"
 ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", device = "png")
 
 
+# Correlation matrix for numerical variables
+narwhalnum <- narwhal[, c("ODBA", "VeDBA", "Strokerate")]
+
+cormat1 <- cor(data.matrix(na.omit(narwhalnum)), method = "pearson")
+
+png("figs/correlationmatrixnum.png")
+catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45, number.digits = 3, addCoef.col = "white")
+dev.off()
+catcorrmatplot1
+?cor
+?corrplot.mixed
 # Correlation matrix for categorical variables
 narwhalcat <- narwhal[, c(4,5,6,7,8,10,12,13,19)]
 
@@ -174,4 +185,4 @@ cormat1 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
 png("figs/correlationmatrix.png")
 catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
 dev.off()
-
+?corrplot
