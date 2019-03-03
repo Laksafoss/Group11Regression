@@ -242,6 +242,10 @@ fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA,
 
 ![](figs/StrokerateSubNormalreg.png)
 
+While the original dataset is still distinguishable among the 8 simulated datasets, it does look like the data could be distributed as the model predicts. 
+
+
+
 ## Conclusion
 
 ## Appendix
