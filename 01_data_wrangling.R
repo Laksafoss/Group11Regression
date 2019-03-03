@@ -83,7 +83,6 @@ find_sub_data <- function(x) {
   X <- narwhal_summarised <- narwhal %>%
     group_by((!!as.name(x)), Ind) %>%
     summarise(Start = min(Datetime, na.rm = T),
-              End = max(Datetime, na.rm = T),
               Depth = mean(Depth, na.rm = T),
               Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
               Phase = first(Phase),
@@ -95,13 +94,15 @@ find_sub_data <- function(x) {
               Click = sum(as.numeric(Click) - 1, na.rm = T),
               Buzz = sum(as.numeric(Call) - 1, na.rm = T),
               ODBA = mean(ODBA, na.rm = T),
-              StrokeRate = mean(Strokerate, na.rm = T),
+              VeDBA = mean(VeDBA, na.rm = T),
+              Strokerate = mean(Strokerate, na.rm = T),
               Los = first(Los),
+              Lat = mean(Lat, na.rm = T),
+              Long = mean(Long, na.rm = T),
               Sun = first(Sun)
     )
   X <- X[ ,-1]
   X$Dive <- X$Depth > 10
-  X$Duration <- as.numeric(X$End - X$Start)
   return(X)
 }
 

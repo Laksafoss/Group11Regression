@@ -1,6 +1,6 @@
 ---
 title: "Regression"
-author: "Anders Christensen, Anna DamkjÃ¦r Laksafoss and Stefan Bruhn Rasmussen"
+author: "Anders Christensen, Anna Damkjaer Laksafoss and Stefan Bruhn Rasmussen"
 date: "February 21, 2019"
 output:
   html_document: default
@@ -48,7 +48,7 @@ Before we can analyse the data we must clean up the data. The data set contains 
 There are a few issues of duplicate observations. There were 16 identical observations and 4 observations which only differed sligthy in `Dist.to.Paamiut`. Looking at the table below we see that all 16 identical observations has `Dist.to.Paamiut` = NA.
 For the 16 identical observations, one of each duplicates was deleted from the data set. The observation pairs 9, 10 and 11, 12 only differs very slighty in `Dist.to.Paamiut` so two new observations with `Dist.to.Paamiut` equal to the mean of `Dist.to.Paamiut` in each pair and all other attributes the same were added instead.    
 
-```{r, echo=FALSE}
+```{r Duplicate_table, echo=FALSE}
 Alldups <- readRDS("outputs/AllDuplicates.RDS")
 Twodups <- readRDS("outputs/TwoDuplicates.RDS")
 row.names(Twodups)[1:2] <- c("  "," ")
@@ -69,7 +69,7 @@ row_spec(9:12,background = "#fca9b6")
 
 Examing `Strokerate` after these operations shows that it has 686 NA values. The time periodes where these NA values occur are shown in the table below.
 
-```{r, echo=FALSE}
+```{r Strokerate_NAs, echo=FALSE}
 NAStrokeDf <- readRDS("outputs/NAStrokeDf.RDS")
 kable(NAStrokeDf[,2:5]) %>% 
   kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
@@ -89,7 +89,6 @@ The data we are considering is in fact time series data and as such it is not we
 
 * `Ind`; factor;  whale name
 * `Start` date time; first time point in the group
-* `End` date time; last time point in the group
 * `Depth` numeric; average depth
 * `Seismik` numeric; average number of seismic activity pr second
 * `Phase` factor; phase of the first observation
@@ -101,18 +100,26 @@ The data we are considering is in fact time series data and as such it is not we
 * `Click` numeric; number of clicks that minut
 * `Buzz` numeric; number of buzz's that minut
 * `ODBA` numeric; average overall dynamic body acceleration
+* `VeDBA` numeric; average vector dynamic body acceleration
 * `StrokeRate` numeric; average stroke rate
 * `Los` factor; whether the whale was in the line of sight in the first observation
+* `Lat` numeric; average latitude
+* `Long` numeric; average longitude
 * `Sun` factor; whether the sun was up or down at this time point 
 * `Dive` logical; whether the whale was diving (diving starts at 10 meters)
 
 
 # Exploratory data analysis
 
-Now that data is complete we can take a more detailed look at the individual variables. As the dataset consits of 21 variables, we will plot and analyze these variables in groups. 
+Now that we have our final dataset of 17.632 observations we can take a more detailed look at the individual variables. As the dataset consits of 20 variables, we will plot and analyze these variables in groups. 
 
 ### The potential response variables
 Let us first look at our potential respons variables. 
+
+```{r new_data_readin, include=FALSE}
+narwhal <- readRDS("outputs/narwhal_Minut.RDS")
+```
+
 
 ```{r sum_response}
 summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
