@@ -78,7 +78,7 @@ kable(NAStrokeDf) %>%
 We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full data set we simply remove them.
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
 
-### NAs in `Dist.to.Paamiut`
+
 
 ### Sun as factor
 
@@ -148,9 +148,9 @@ summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buz
 We note that
 
 * `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile.
-* `ODBA` and `VeDBA` are on the same magnitude and both have some negative values.
-* `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
-* `Strokerate` are positive and the plot is "jagged" because it is integers only.
+* `ODBA` and `VeDBA` are on the same magnitude.
+* The distriubtion of `ODBA`, `VeDBA` and `Strokerate` looks a like up to a scaling parameter.
+
 
 We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as they are all measurements of movement speed. We plot the Spearman correlations:
 
