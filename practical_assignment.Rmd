@@ -212,7 +212,7 @@ We choose to present these four models as these were the order in which the mode
 
 ## Model 1: Depth (And Click / Call models)
 
-We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since this family is useful for **HVORFOR**
+We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since we expect the mean to be linear on the log scale and that the variance will increase in a fashion determined by the mean.
 
 ```{r, eval = FALSE}
 fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
@@ -235,11 +235,11 @@ The models were we instead have Click or Call as response variable also yield re
 
 ## Strokerate model
 
-Similary, we fit a generalized linear model now with the Strokerate variable as response:
+Similarly, we fit a generalized linear model now with the Strokerate variable as response:
 
 ```{r, eval = FALSE}
-fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 ```
   
 
@@ -254,7 +254,7 @@ While the original dataset is still distinguishable among the 8 simulated datase
 
 ## Conclusion
 
-Our analysis of the dataset started out with a thought cleaning of the data. Firtsly, we combined some variables, removed colinear variables and aggregated the data into intervals, so that the dataset did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
+Our analysis of the dataset started out with a thought cleaning of the data. Firtsly, we removed duplicaete observations, combined some variables, removed colinear variables and aggregated the data into intervals, so that the dataset did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
 
 We then continued into the analysis of our dataset. We tested various models for our selected response variables, but only the model of strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
 
@@ -280,6 +280,8 @@ Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no v
 ![](PercentageTable.png)
 
 We see that except for the B phase, there is no clear tendency as to when values are present or not.
-**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
 
+```{r include=FALSE}
+#**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
+```
 
