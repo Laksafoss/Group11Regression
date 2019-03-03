@@ -235,19 +235,29 @@ By plotting the depth over time - colored according to phases - we see that the 
 * Should we use both whales? Given that one of the appears only in some trials 
 
 
-##Time of day factor
+## Time of day factor
 **Skal nok slettes, da vi har variabel med sol nu**
 Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity. 
 
 Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
 
 
+## Aggregation of phases
+
+In the following data analysis, we will fit models to a factor consisting of the different phases as well as a aggregated factor of the phases, differentiating only between whether or not we are in a Test phase (i.e. if there is seismic activity from the airgun or not). 
+
+
 ## Data Analysis
 
 We wish to examine whether or not the behaviour of the whales is affected by the boat and airgun.
 
-For this purpose we will fit a generalized linear model over our aggregated data and estimate the true parameters of our various explanatory variables. 
+For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the true parameters of our various explanatory variables. 
 
+In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. We will perform both Ridge regression and standard regression for each of the four variables.
+
+We choose to present these four models as these were the order in which the models have been fitted, and in the following analysis it will be argued that the first three of these are unsatisfactory and hence will be disregarded. However, as the analysis will also show, our fourth model has a reasonable fit.
+
+## Model 1: Depth
 
 
 
