@@ -114,29 +114,36 @@ The data we are considering is in fact time series data and as such it is not we
 Now that we have our final dataset of 17.632 observations we can take a more detailed look at the individual variables. As the dataset consits of 20 variables, we will plot and analyze these variables in groups. 
 
 ### The potential response variables
-Let us first look at our potential respons variables. 
+Let us first look at our potential respons variables. First we make density plots.
 
 ```{r new_data_readin, include=FALSE}
 narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 ```
 
-
-```{r sum_response}
-summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
-```
 ![](figs/numerical_densities_resp.png){width=750px}
 
 We note that
 
-* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile.
+* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. 
 * `ODBA` and `VeDBA` are on the same magnitude and both have some negative values.
 * `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
 * `Strokerate` are positive and the plot is "jagged" because it is integers only.
 
-* `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set. *NEEDS CALULATION*
-* `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
+Now we consider the correlation between these variables and most notably we find
+that `ODBA` and `VeDBA` are correlated with correlation coefficient 0.997, and that
+`Call` and `Buzz` are in fact totally correlated with a correlation coefficient of 1. 
+
+```{r}
+cor(narwhal$ODBA, narwhal$VeDBA)
+cor(narwhal$Call, narwhal$Buzz)
+```
+
+This leads us the remove `VeDBA` and `Buzz` from the dataset.
+
 
 ### The categorical explanatory variables
+We now consider the categorical explanatory variables. 
+
 ```{r sum_cat_explanatory}
 summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
@@ -158,10 +165,15 @@ x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$P
 kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
+
+
+
 ### The numeric explanatory variables
+Lastly we turn to the numerical explanatory variables. 
 ```{r sum_num_explanatory}
 summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
 ```
+
 
 ![](figs/numerical_densities_exp.png){width=750px}
 
@@ -179,14 +191,6 @@ By plotting the depth over time - colored according to phases - we see that the 
 ![](figs/depthtimeplotPhasesNoB.png)
 
 ### Conclusions and choices made from exploratory data analysis
-
-* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
-* By looking at `Depth` we can partion the data into distintive Dives.
-* **SOMETHING WITH NAs in DIST TO PAARMIUT**
-
-### Choices made from exploratory data analysis
-
-* Remove `Dist.to.Paamiut`
 
 
 ## Aggregation of phases
