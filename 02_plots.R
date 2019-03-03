@@ -5,7 +5,7 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 
-narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_Minut.RDS")
 
 # histrogram/Density plots of exp numerical variables 
 numnames <- c("Dist.to.Paamiut","Dist.to.shore", "Lat", "Long")
@@ -28,7 +28,7 @@ ggsave(numplots, filename = "figs/numerical_densities_resp.png",device = "png")
 
 # Depth/Timeplot
 
-depthtimeplot <- ggplot(narwhal, aes(x = Datetime)) +
+depthtimeplot <- ggplot(narwhal, aes(x = Start)) +
   geom_line(aes(y = -Depth)) +
   facet_wrap(c("Ind", "Phase"), labeller = "label_both", scales = "free_x") +
   ggtitle("Depth over time by phase and Ind") + ylab("Depth")
@@ -36,8 +36,8 @@ ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png")
 
 times <- narwhal %>%
   group_by(Phase, Ind) %>%
-  summarise(start = min(Datetime),
-            end = max(Datetime))
+  summarise(start = min(Start),
+            end = max(Start))
 
 depthtimeplotPhases <- ggplot(narwhal) +
   geom_rect(
@@ -45,7 +45,7 @@ depthtimeplotPhases <- ggplot(narwhal) +
     ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times
   ) + 
-  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
+  geom_line(aes(x = Start, y = -Depth), size = 0.3) +
   facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
   ggtitle("Depth over time by Ind, shaded by Phase") + ylab("Depth")
 
@@ -57,7 +57,7 @@ depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
     ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times[times$Phase != "B",]
   ) + 
-  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
+  geom_line(aes(x = Start, y = -Depth), size = 0.3) +
   facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
   ggtitle("Depth over time by Ind, shaded by Phase without the B-Phase")+ ylab("Depth")
 depthtimeplotPhasesNoB
@@ -70,7 +70,7 @@ depthtimeplotPhasesNoBHelge <- ggplot(narwhal[narwhal$Ind == "Helge" & narwhal$P
     ymin = -Inf, ymax = Inf, alpha = 0.8,
     data = times[times$Phase != "B",]
   ) + 
-  geom_line(aes(x = Datetime, y = -Depth), size = 0.3) +
+  geom_line(aes(x = Start, y = -Depth), size = 0.3) +
   ggtitle("Helges Depth over time after B-Phase, shaded by Phase") + ylab("Depth")
 
 ggsave(depthtimeplotPhasesNoBHelge, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
@@ -90,14 +90,14 @@ startstop <- narwhal %>%
   filter(!is.na(Long),
          !is.na(Lat)) %>% 
   filter(
-    Datetime %in% c(min(Datetime),max(Datetime))
+    Start %in% c(min(Start),max(Start))
   )
 startstop$StartStop <- c("Start","Stop")  
 
 
 locationplot <- ggplot(narwhal,
                        aes(x = Lat, y = Long, group = Ind)) +
-  geom_path(aes(colour = Datetime))  +
+  geom_path(aes(colour = Start))  +
   geom_point(data = startstop, aes(shape = StartStop), size = 2) +
   facet_wrap("Ind", labeller = "label_both")
 
@@ -119,21 +119,21 @@ startstopNoB <- narwhal %>% group_by(Ind) %>%
          !is.na(Lat),
          Phase != "B") %>% 
   filter(
-    Datetime %in% c(min(Datetime),max(Datetime))
+    Start %in% c(min(Start),max(Start))
   )
 
 startstopNoB$StartStop <- c("Start","Stop")  
 
 locationplotNoB <- ggplot(narwhal[narwhal$Phase != "B",],
                        aes(x = Lat, y = Long, group = Ind)) +
-  geom_path(aes(colour = Datetime))  +
+  geom_path(aes(colour = Start))  +
   geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
   facet_wrap("Ind", labeller = "label_both", scales = "free") + 
   ggtitle("Excluding Phase B")
 
 locationplotNoB
 
-locationsplots <- arrangeGrob(locationplot, locationplotNoB, nrow = 2, top = "Location plots by Datetime with and without Phase B")
+locationsplots <- arrangeGrob(locationplot, locationplotNoB, nrow = 2, top = "Location plots by Start with and without Phase B")
 ggsave(locationsplots, filename = "figs/locationsplotswNoB.png", device = "png")
 
 
@@ -144,13 +144,13 @@ startstopNoB <- narwhal %>%
          !is.na(Lat),
          Phase != "B") %>% 
   filter(
-    Datetime %in% c(min(Datetime),max(Datetime))
+    Start %in% c(min(Start),max(Start))
   )
 startstopNoB$StartStop <- c("Start","Stop")  
 
 locationplotNoBNoHelge <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind == "Helge" ,],
                        aes(x = Lat, y = Long, group = Ind)) +
-  geom_path(aes(colour = Datetime))  +
+  geom_path(aes(colour = Start))  +
   geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
   ggtitle("Location Plot")
 
@@ -167,8 +167,7 @@ ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", devic
 
 
 # Correlation matrix for categorical variables
-narwhalcat <- narwhal[, c(4,5,6,7,8,10,12,13,19)]
-
+narwhalcat <- narwhal[, c("Ind", "Area", "Click", "Buzz", "Acou.qua", "Seismik", "Phase", "Los")]
 cormat1 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
 
 png("figs/correlationmatrix.png")
