@@ -133,36 +133,37 @@ Thus we aggregate the data such that each observations corresponds to 1 minute. 
 Which yields a data set of 17.632 observations. As the data set consists of 20 variables, we will plot and analyze these variables in groups. 
 
 ### The potential response variables
-Let us first look at our potential response variables. 
+
+Let us first look at our potential respons variables. First we make density plots.
 
 ```{r new_data_readin, include=FALSE}
 narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 ```
 
-
-```{r sum_response}
-summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
-```
 ![](figs/numerical_densities_resp.png){width=750px}
 
 We note that
 
-* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile.
+* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. 
 * `ODBA` and `VeDBA` are on the same magnitude and both have some negative values.
 * `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
 * `Strokerate` are positive and the plot is "jagged" because it is integers only.
 
-We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as they are all measurements of movement speed. We plot the Spearman correlations:
+Now we consider the correlation between these variables and most notably we find
+that `ODBA` and `VeDBA` are correlated with correlation coefficient 0.997, and that
+`Call` and `Buzz` are in fact totally correlated with a correlation coefficient of 1. 
 
-![](figs/correlationmatrixnum.png){width=500px}
-
-Which unsurprisingly shows nearly perfect positive correlation between `ODBA` and`VeDBA`. It also shows a weak to moderate positive correlation between `Strokerate` and `ODBA`, `VeDBA`.
-
-```{r include=FALSE}
-# * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
+```{r}
+cor(narwhal$ODBA, narwhal$VeDBA)
+cor(narwhal$Call, narwhal$Buzz)
 ```
 
+This leads us the remove `VeDBA` and `Buzz` from the dataset.
+
+
 ### The categorical explanatory variables
+We now consider the categorical explanatory variables. 
+
 ```{r sum_cat_explanatory}
 summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
@@ -184,25 +185,20 @@ x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$P
 kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
+
+
+
 ### The numeric explanatory variables
+Lastly we turn to the numerical explanatory variables. 
 ```{r sum_num_explanatory}
 summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
 ```
+
 
 ![](figs/numerical_densities_exp.png){width=750px}
 
 Since Lat and Long together determines an position we can't conclude anything about locations from looking at their densities.
 
-```{r include = FALSE}
-### Conclusions and choices made from exploratory data analysis
-#* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
-#* By looking at `Depth` we can partion the data into distinctive Dives.
-#* **SOMETHING WITH NAs in DIST TO PAARMIUT**
-
-### Choices made from exploratory data analysis
-
-#* Remove `Dist.to.Paamiut`
-```
 
 ## Aggregation of phases
 
@@ -212,19 +208,42 @@ In the following data analysis, we will fit models to a factor consisting of the
 
 We wish to examine whether or not the behavior of the whales is affected by the boat and airgun.
 
-For this purpose we will fit a generalized linear models over our aggregated data sets and estimate the true parameters of our various explanatory variables. 
+For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the effect of our various explanatory variables. In all four models we choose
+the Poisson distribution with the log link to describe the conditional distribution of 
+our response variables given our explanatory variables. The Poisson distribtion is chosen as 
+all four variables `Depth`, `Click`, `Call` and `strokerate` takes values on the positive
+reals and moreover both `Click` and `Call`are indeed counting variables. 
 
-In the following we will present some different models with different response variables. We have chosen the four response variables `Depth`, `Click`, `Call` and `Strokerate`. We will perform both Ridge regression and standard regression for each of the four variables.
+To answer our scientific question we are in fact only really interested in the estimated
+effects of the `Phase` variable, as this is the variables that encodes the presence of the
+Paamiut ship and shooting. We do however keep as many explanatory variables in the model as possible to adjust for potential confounders between the responses of interest and `Phase`. 
 
-We choose to present these four models as these were the order in which the models have been fitted, and in the following analysis it will be argued that the first three of these are unsatisfactory and hence will be disregarded. However, as the analysis will also show, our fourth model has a reasonable fit.
+```{r}
+narwhal$Phasesub <- narwhal$Phase
+levels(narwhal$Phasesub) <- list("B" = c("B"),
+                              "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
+                              "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
+```
+
+
+We will however never allow one of the responsvariables to be an explanatory variable in 
+another model. 
+
+To judge goodness of fit we will look at residual plots. We will plot the observed residual
+plot among 8 residual plots based on data simulated under the model. 
+
+
+In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. 
+
 
 ## Model 1: Depth (And Click / Call models)
 
-We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since this family is useful for **HVORFOR**
+We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, as the `Depth` variable takes values on the positive reals 
+and could seem to have 
 
-```{r, eval = FALSE}
-fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+
+```{r}
+fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
 ```
 
 
@@ -233,30 +252,43 @@ Fitting these models and simulating 8 new data sets with the fitted models as th
 
 ![](figs/DepthNormalreg.png)
 
+Quite clearly in this plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset. 
 
-![](figs/DepthSubNormalreg.png)
+The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable dataseet, and so we also disregard these models.
 
-
-Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original data set.
-
-The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable data set, and so we also disregard these models.
 
 ## Strokerate model
 
-Similarly, we fit a generalized linear model now with the `Strokerate` variable as response:
+Similary, we fit a generalized linear model now with the Strokerate variable as response:
 
-```{r, eval = FALSE}
-fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+```{r}
+fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
 ```
   
 
 
 ![](figs/StrokerateNormalreg.png)
 
-![](figs/StrokerateSubNormalreg.png)
 
 While the original data set is still distinguishable among the 8 simulated data sets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
+
+For now, however, we will create the submodel and plot residuals
+
+```{r}
+fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
+```
+
+![](figs/StrokerateSubNormalreg.png)
+
+Again the observed residual plot is identifiable, but we will accept the fit.
+
+```{r}
+anova(fit.strokerate, fit.strokerate.sub, test = "LRT")
+```
+
+
+
+
 
 
 
