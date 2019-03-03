@@ -86,6 +86,9 @@ plot(fit.depth)
 fit.depth.sub <- netfitter(xsub[,-no], DATA$Depth, train)
 plot(fit.depth.sub)
 
+
+
+
 # normal regression
 fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
@@ -93,9 +96,12 @@ fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DA
 anova(fit.depth, fit.depth.sub, test = "LRT") # Likelihood ratio test
 anova(fit.depth, fit.depth.sub, test = "Cp")  # like AIC
 
+png("figs/DepthNormalreg")
 residualplotter(fit.depth, 3,3)
+dev.off()
+png("figs/DepthSubNormalreg")
 residualplotter(fit.depth.sub, 3,3)
-
+dev.off()
 
 
 # Click model ==================================================================
