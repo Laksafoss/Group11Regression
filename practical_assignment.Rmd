@@ -71,11 +71,8 @@ Examing `Strokerate` after these operations shows that it has 686 NA values. The
 
 ```{r Strokerate_NAs, echo=FALSE}
 NAStrokeDf <- readRDS("outputs/NAStrokeDf.RDS")
-
 kable(NAStrokeDf) %>% 
-  kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>%
-  group_rows("NA intervals", 1, 3) %>% 
-  group_rows("Time range for whole experiment", 4, 5) 
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>% group_rows("NA intervals", 1, 3) %>%  group_rows("Time range for whole experiment", 4, 5) 
 ```
 
 We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full dataset we simply remove them.
@@ -140,7 +137,7 @@ We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as 
 
 ![](figs/correlationmatrixnum.png){width=500px}
 
-Which unsurprisingly shows nearly perfect positive correlation between `ODBA` and`VeDBA`. It also shows a weak positive correlation between `Strokerate` and `ODBA`, `VeDBA`.
+Which unsurprisingly shows nearly perfect positive correlation between `ODBA` and`VeDBA`. It also shows a weak to moderate positive correlation between `Strokerate` and `ODBA`, `VeDBA`.
 
 ```{r include=FALSE}
 # * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
@@ -217,7 +214,7 @@ We choose to present these four models as these were the order in which the mode
 
 We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since this family is useful for **HVORFOR**
 
-```{r}
+```{r, eval = FALSE}
 fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 ```
@@ -240,10 +237,9 @@ The models were we instead have Click or Call as response variable also yield re
 
 Similary, we fit a generalized linear model now with the Strokerate variable as response:
 
-```{r}
+```{r, eval = FALSE}
 fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-
 ```
   
 
