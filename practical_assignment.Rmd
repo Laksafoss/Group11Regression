@@ -203,7 +203,7 @@ In the following we will present some different models with different response v
 
 We choose to present these four models as these were the order in which the models have been fitted, and in the following analysis it will be argued that the first three of these are unsatisfactory and hence will be disregarded. However, as the analysis will also show, our fourth model has a reasonable fit.
 
-## Model 1: Depth
+## Model 1: Depth (And Click / Call models)
 
 We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since this family is useful for **HVORFOR**
 
@@ -224,9 +224,23 @@ Fitting these models and simulating 8 new datasets with the fitted models as the
 
 Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset.
 
-The models were we instead have Click or Call as response variable yield vary similar residual plots, and so we also disregard these models.
+The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable dataseet, and so we also disregard these models.
 
-# Strokerate model
+## Strokerate model
+
+Similary, we fit a generalized linear model now with the Strokerate variable as response:
+
+```{r}
+fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+
+```
+  
+
+
+![](figs/StrokerateNormalreg.png)
+
+![](figs/StrokerateSubNormalreg.png)
 
 ## Conclusion
 

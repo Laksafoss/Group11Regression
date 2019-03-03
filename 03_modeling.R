@@ -160,11 +160,15 @@ plot(fit.strokerate.sub)
 
 
 # normal regression
-fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 
 anova(fit.strokerate, fit.strokerate.sub, test = "LRT") # Likelihood ratio test
 anova(fit.strokerate, fit.strokerate.sub, test = "Cp")  # like AIC
 
+png("figs/StrokerateNormalreg.png")
 residualplotter(fit.strokerate, 3,3)
+dev.off()
+png("figs/StrokerateSubNormalreg.png")
 residualplotter(fit.strokerate.sub, 3,3)
+dev.off()
