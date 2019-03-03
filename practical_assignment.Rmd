@@ -25,9 +25,7 @@ if (fullrun) {
 }
 ```
 
-
-
-In this report we will attempt to understand if the whales are affected by the presence of the seismic ship. We will be considering the following valiables as measures of the whales behaviour
+In this report we will attempt to understand if the whales are affected by the presence of the seismic ship. We will be considering the following variables as measures of the whales behaviour:
 
 * `Depth`: Depth of the whale in meters belows sea level
 * `Call`: Whether a whale makes a call
@@ -39,11 +37,11 @@ In this report we will attempt to understand if the whales are affected by the p
 
 These variables are all potential response variables or will be used to create response variable. 
 
-# Data clean up
+# Data clean up/preparation
 Before we can analyse the data we must clean up the data. The data set contains 1.058.507 data lines over 19 variables. From the description of the data in the problem description we can make the following initial changes:
 
 * Combine `Date` and `Hour` to a new single time object called `Datetime`.
-* Correct for positve `Depths` by substracting maximum value from all values
+* Correct for positve `Depths` by substracting the maximum value from all values
 * Encode -1 as NA for those variables, where it applies
 
 ### Duplicate observations 
@@ -67,9 +65,9 @@ group_rows("Replacement for rows 11 and 12", 22, 22) %>%
 row_spec(9:12,background = "#fca9b6") 
 ```
 
-### NAs in Strokerate
+### NAs in `Strokerate`
 
-Examing `Strokerate` after these operations shows that it has 686 NA values. The times where these NA values occur are shown in the table below.
+Examing `Strokerate` after these operations shows that it has 686 NA values. The time periodes where these NA values occur are shown in the table below.
 
 ```{r, echo=FALSE}
 NAStrokeDf <- readRDS("outputs/NAStrokeDf.RDS")
@@ -80,10 +78,11 @@ kable(NAStrokeDf[,2:5]) %>%
 We see that all these NAs are either in the first or last measurements for each whale. We assume that this is because the experiments were not yet properly started and we have simply remove these data lines as they are a very small fraction of the full data set. 
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
 
+### NAs in `Dist.to.Paamiut`
+
 ### Sun as factor
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` varibale encoding whether or not the sun was up or down at the time. <br>
-
 
 ### Aggregrating the data
 The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - it has more then a million data lines - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function `find_sub_data`, which given a vector of groups will aggregrate data according to the groups found in the input vector. The output of this function is then a data frame with 19 variables. 
@@ -145,11 +144,9 @@ As each data line corresponds to 1 second the first summarizing method that spri
 
 **WHY ARE THESE DATA GROUPINGS INTERESTING**
 
+# Exploratory data analysis
 
-
-## Exploratory analysis
 Now that data is complete we can take a more detailed look at the individual variables. As the dataset consits of 21 variables, we will plot and analyze these variables in groups. 
-
 
 ### The potential response variables
 Let us first look at our potential respons variables. 
@@ -157,68 +154,53 @@ Let us first look at our potential respons variables.
 ```{r sum_response}
 summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
 ```
+![](figs/numerical_densities_resp.png){width=750px}
+
 We note that
 
 * `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile.
 * `ODBA` and `VeDBA` are on the same magnitude and both have some negative values.
 * `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
-* `Strokerate` are positive and seems to be integers only.
+* `Strokerate` are positive and the plot is "jagged" because it is integers only.
 
-
-**HERE WE WILL ALSO BE ADDING NEW VARIABLES** :  
-
-
-
-*Removing variables and observarions*: We can remove variables from the data, as some variables describe the same phenomena. 
-
-* `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set.
+* `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set. *NEEDS CALULATION*
 * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
-
-![](figs/depthtimeplot.png)
-
 
 ### The categorical explanatory variables
 ```{r sum_cat_explanatory}
 summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
 
+We note that
+
+* We have more observations on the whale "Helge" than on "Thor"
+* `Acou.qua` are almost always "G"
 A correlation plot for the categorical variables gives the impression that there is no extreme correlation betwwen the categorical variables:
 
 ![](figs/correlationmatrix.png)
 
 Therefore the above plot does not force us to disregard any of the variables.
 
-However, a closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated. Indeed, we see that
+However, a closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated. Indeed, from the table below we see that `Seismik` is completely determined by `Phase`.
 
-```{r}
-sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
+```{r, echo=FALSE}
+x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
+kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
-
-Hence `Seismik` is completely determined by `Phase`.
-
-
-
 
 ### The numeric explanatory variables
 ```{r sum_num_explanatory}
 summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
 ```
 
-![](figs/numerical_densities.png)
+![](figs/numerical_densities_exp.png){width=750px}
 
-Vi ser at
+Since Lat and Long together determines an position we can't conclude anything about locations from looking at their densities. 
 
-* Strokerate er "hakket" fordi det kun er integers
+![](figs/locationplot.png){width=750px}
+![](figs/locationsplotswNoB.png){width=750px}
 
-![](figs/locationplot.png)
-
-```{r summaries}
-summary(narwhal[,c(3:19)])
-table(narwhal[,c("Ind","Phase")])
-```
-
-
-Depth and phases:
+## Depth and phases:
 
 By plotting the depth over time - colored according to phases - we see that the whales do a lot of short dives, and some very deep dives. We judge that there is no clear trend in time, nor any clear effect of the different phases. Considering the B phase as a control phase, there is also no clear difference before and during the experiments.
 
@@ -226,34 +208,22 @@ By plotting the depth over time - colored according to phases - we see that the 
 
 ![](figs/depthtimeplotPhasesNoB.png)
 
+### Conclusions and choices made from exploratory data analysis
 
+* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
+* By looking at `Depth` we can partion the data into distintive Dives.
+* **SOMETHING WITH NAs in DIST TO PAARMIUT**
 
+### Choices made from exploratory data analysis
 
-
-### Ideas/Thoughts
-
-* Make a binary *Phase* variable with level *T* and *I*
-* Partion binary variables (such as *Calls*) into intervals (e.g. 30 second intervals around each call)
-* Make A binary *Diving* variable by partioning the Depth variable.
-* Pay attention to *Data leakage* (When you predict something using data which is not availiable at prediction time.)
-* Make correlation plot
-* Area is likely just a Long and Lat with broader categories
-* Should we use both whales? Given that one of the appears only in some trials 
-
-
-##Time of day factor
-**Skal nok slettes, da vi har variabel med sol nu**
-Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity. 
-
-Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
+* Remove `Dist.to.Paamiut`
 
 
 ## Aggregation of phases
 
 In the following data analysis, we will fit models to a factor consisting of the different phases as well as a aggregated factor of the phases, differentiating only between whether or not we are in a Test phase (i.e. if there is seismic activity from the airgun or not). 
 
-
-## Data Analysis
+# Data Analysis and modeling
 
 We wish to examine whether or not the behaviour of the whales is affected by the boat and airgun.
 
@@ -273,8 +243,11 @@ We choose to present these four models as these were the order in which the mode
 
 ## Appendix
 
+### Plots with no clear position yet.
 
-#Missing values
+
+
+### Missing values
 As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
 ![](figs/Missing_Values_Overview.png)
 
