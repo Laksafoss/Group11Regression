@@ -248,6 +248,11 @@ While the original dataset is still distinguishable among the 8 simulated datase
 
 ## Conclusion
 
+Our analysis of the dataset started out with a thought cleaning of the data. Firtsly, we combined some variables, removed colinear variables and aggregated the data into intervals, so that the dataset did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
+
+We then continued into the analysis of our dataset. We tested various models for our selected response variables, but only the model of strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
+
+
 ## Appendix
 
 ### Plots with no clear position yet.
