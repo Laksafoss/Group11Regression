@@ -78,6 +78,8 @@ kable(NAStrokeDf) %>%
 We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full data set we simply remove them.
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
 
+### NAs in `Dist.to.Paamiut`
+
 ### Sun as factor
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` variable encoding whether or not the sun was up or down at the time. <br>
@@ -244,8 +246,8 @@ The models were we instead have Click or Call as response variable also yield re
 Similarly, we fit a generalized linear model now with the `Strokerate` variable as response:
 
 ```{r, eval = FALSE}
-fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
 ```
   
 
@@ -272,10 +274,10 @@ We then continued into the analysis of our data set. We tested various models fo
 
 
 ### Missing values
-As already mentioned the data set has quite a lot of missing values. In order to examine whether there is some systematize behind which values are missing, we plot the intersection of missing values:
+As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
 ![](figs/Missing_Values_Overview.png)
 
-We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a function of the phases (except for `Dist.to.Paamiut`):
+We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
 
 ![](figs/Missing_values_phase.png)
 
@@ -288,4 +290,7 @@ Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no v
 We see that except for the B phase, there is no clear tendency as to when values are present or not.
 **INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
 
+```{r include=FALSE}
+#**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
+```
 
