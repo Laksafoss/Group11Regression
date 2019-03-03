@@ -266,7 +266,7 @@ Our analysis of the data set started out with a thought cleaning of the data. Fi
 
 We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the model of Strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
 
-
+```{r, include = FALSE}
 ## Appendix
 
 ### Plots with no clear position yet.
@@ -274,23 +274,23 @@ We then continued into the analysis of our data set. We tested various models fo
 
 
 ### Missing values
-As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
-![](figs/Missing_Values_Overview.png)
+#As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+#![](figs/Missing_Values_Overview.png)
 
-We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
+#We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
 
-![](figs/Missing_values_phase.png)
+#![](figs/Missing_values_phase.png)
 
-We see that none of the variables used in the model are missing.
+#We see that none of the variables used in the model are missing.
 
-Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
+#Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
 
-![](PercentageTable.png)
+#![](PercentageTable.png)
 
-We see that except for the B phase, there is no clear tendency as to when values are present or not.
-**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
-
-```{r include=FALSE}
+#We see that except for the B phase, there is no clear tendency as to when values are present or not.
 #**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
-```
 
+#```{r include=FALSE}
+#**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
+#```
+```
