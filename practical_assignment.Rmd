@@ -242,7 +242,7 @@ fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA,
 
 ![](figs/StrokerateSubNormalreg.png)
 
-While the original dataset is still distinguishable among the 8 simulated datasets, it does look like the data could be distributed as the model predicts. 
+While the original dataset is still distinguishable among the 8 simulated datasets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
 
 
 
