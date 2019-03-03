@@ -205,9 +205,28 @@ We choose to present these four models as these were the order in which the mode
 
 ## Model 1: Depth
 
+We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, since this family is useful for **HVORFOR**
+
+```{r}
+fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+```
 
 
+Fitting these models and simulating 8 new datasets with the fitted models as the true models yields the following plots:
 
+
+![](figs/DepthNormalreg.png)
+
+
+![](figs/DepthSubNormalreg.png)
+
+
+Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset.
+
+The models were we instead have Click or Call as response variable yield vary similar residual plots, and so we also disregard these models.
+
+# Strokerate model
 
 ## Conclusion
 
