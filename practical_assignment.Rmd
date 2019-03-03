@@ -84,6 +84,7 @@ Thus the first 578 and last 76 observations are removed from "Thor" and the firs
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` varibale encoding whether or not the sun was up or down at the time. <br>
 
+
 ### Aggregrating the data
 The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - it has more then a million data lines - and any fitting and plotting procedure will be a bit slow. To deal with this we have created a summarizing function `find_sub_data`, which given a vector of groups will aggregrate data according to the groups found in the input vector. The output of this function is then a data frame with 19 variables. 
 
@@ -167,10 +168,14 @@ We note that
 **HERE WE WILL ALSO BE ADDING NEW VARIABLES** :  
 
 
+
 *Removing variables and observarions*: We can remove variables from the data, as some variables describe the same phenomena. 
 
 * `ODBA` and `VeDBA` both describe the body acceleration of the whales and the two variables are extremly correlated with a correlation coefficient of 0.995. We remove the variable `VeDBA` from the data set.
 * `Call`, `Buzz`, `Click` ------ **WILL WE BE REMOVING THESE**
+
+![](figs/depthtimeplot.png)
+
 
 ### The categorical explanatory variables
 ```{r sum_cat_explanatory}
@@ -190,6 +195,8 @@ sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase 
 ```
 
 Hence `Seismik` is completely determined by `Phase`.
+
+
 
 
 ### The numeric explanatory variables
@@ -219,12 +226,44 @@ By plotting the depth over time - colored according to phases - we see that the 
 
 ![](figs/depthtimeplotPhasesNoB.png)
 
+
+
+
+
+### Ideas/Thoughts
+
+* Make a binary *Phase* variable with level *T* and *I*
+* Partion binary variables (such as *Calls*) into intervals (e.g. 30 second intervals around each call)
+* Make A binary *Diving* variable by partioning the Depth variable.
+* Pay attention to *Data leakage* (When you predict something using data which is not availiable at prediction time.)
+* Make correlation plot
+* Area is likely just a Long and Lat with broader categories
+* Should we use both whales? Given that one of the appears only in some trials 
+
+
+##Time of day factor
+**Skal nok slettes, da vi har variabel med sol nu**
+Since the time of day (e.g. morning, night) may have an influence on whale behaviour, we need to adjust for this. Indeed, one could imagine that the whale is more active when there is sunlight. Conversely, however, it could also be imagined that the researchers were more active in the day, and hence the Trial periods were conducted when there was sunlight. As such, the time of day may be a confounder between whale activity and seismic activity. 
+
+Therefore we construct a factor variable with four levels indicating whether the measurement has been done in the the >>morning/noon/evening/night<<. We call this variable >><<....
+
+
+## Aggregation of phases
+
+In the following data analysis, we will fit models to a factor consisting of the different phases as well as a aggregated factor of the phases, differentiating only between whether or not we are in a Test phase (i.e. if there is seismic activity from the airgun or not). 
+
+
 ## Data Analysis
 
 We wish to examine whether or not the behaviour of the whales is affected by the boat and airgun.
 
-For this purpose we will fit a generalized linear model over our aggregated data and estimate the true parameters of our various explanatory variables. 
+For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the true parameters of our various explanatory variables. 
 
+In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. We will perform both Ridge regression and standard regression for each of the four variables.
+
+We choose to present these four models as these were the order in which the models have been fitted, and in the following analysis it will be argued that the first three of these are unsatisfactory and hence will be disregarded. However, as the analysis will also show, our fourth model has a reasonable fit.
+
+## Model 1: Depth
 
 
 
