@@ -7,14 +7,24 @@ library(ggplot2)
 
 narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
-# histrogram/Density plots of numerical variables
-numnames <- c("Depth","Dist.to.Paamiut","Dist.to.shore","ODBA", "VeDBA", "Lat", "Long", "Strokerate")
+# histrogram/Density plots of exp numerical variables 
+numnames <- c("Dist.to.Paamiut","Dist.to.shore", "Lat", "Long")
+numplotslist <- lapply(numnames,
+                       function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
+                         geom_histogram(bins = 50) +
+                         geom_density())
+numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2, top = "Density plots of numerical variables")
+ggsave(numplots, filename = "figs/numerical_densities_exp.png",device = "png")
+
+
+# histrogram/Density plots of Resp numerical variables
+numnames <- c("Depth","ODBA", "VeDBA","Strokerate")
 numplotslist <- lapply(numnames,
                    function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
                      geom_histogram(bins = 50) +
                      geom_density())
-numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 4, top = "Density plots of numerical variables")
-ggsave(numplots, filename = "figs/numerical_densities.png",device = "png")
+numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2,top = "Density plots of numerical variables")
+ggsave(numplots, filename = "figs/numerical_densities_resp.png",device = "png")
 
 # Depth/Timeplot
 
@@ -90,6 +100,7 @@ locationplot <- ggplot(narwhal,
   geom_path(aes(colour = Datetime))  +
   geom_point(data = startstop, aes(shape = StartStop), size = 2) +
   facet_wrap("Ind", labeller = "label_both")
+
 locationplotPhase <- ggplot(narwhal,
                        aes(x = Lat, y = Long, group = Ind)) +
   geom_path(aes(colour = Phase))  +
@@ -102,7 +113,31 @@ ggsave(locationplot, filename = "figs/locationplot.png", device = "png")
 ggsave(locationplotPhase, filename = "figs/locationplotPhase.png", device = "png")
 ggsave(locationsplots, filename = "figs/locationsplots.png", device = "png")
 
-# Location plot no b only Helge
+# Location plot no b
+startstopNoB <- narwhal %>% group_by(Ind) %>% 
+  filter(!is.na(Long),
+         !is.na(Lat),
+         Phase != "B") %>% 
+  filter(
+    Datetime %in% c(min(Datetime),max(Datetime))
+  )
+
+startstopNoB$StartStop <- c("Start","Stop")  
+
+locationplotNoB <- ggplot(narwhal[narwhal$Phase != "B",],
+                       aes(x = Lat, y = Long, group = Ind)) +
+  geom_path(aes(colour = Datetime))  +
+  geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
+  facet_wrap("Ind", labeller = "label_both", scales = "free") + 
+  ggtitle("Excluding Phase B")
+
+locationplotNoB
+
+locationsplots <- arrangeGrob(locationplot, locationplotNoB, nrow = 2, top = "Location plots by Datetime with and without Phase B")
+ggsave(locationsplots, filename = "figs/locationsplotswNoB.png", device = "png")
+
+
+# Location plot no b
 startstopNoB <- narwhal %>% 
   filter(Ind == "Helge",
          !is.na(Long),
@@ -113,22 +148,22 @@ startstopNoB <- narwhal %>%
   )
 startstopNoB$StartStop <- c("Start","Stop")  
 
-locationplotNoB <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind == "Helge" ,],
+locationplotNoBNoHelge <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind == "Helge" ,],
                        aes(x = Lat, y = Long, group = Ind)) +
   geom_path(aes(colour = Datetime))  +
   geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
   ggtitle("Location Plot")
 
-locationplotPhaseNoB <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind == "Helge" ,],
+locationplotPhaseNoBNoHelge <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind == "Helge" ,],
                             aes(x = Lat, y = Long, group = Ind)) +
   geom_path(aes(colour = Phase), size = 1)  +
   geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
   ggtitle("Location Plot")
-locationsplotsNoB <- arrangeGrob(locationplotNoB, locationplotPhaseNoB, ncol = 2, top = "Location plots by Time and by Phase")
-
+locationsplotsNoBoHelge <- arrangeGrob(locationplotNoBNoHelge, locationplotPhaseNoBNoHelge, ncol = 2, top = "Location plots by Time and by Phase")
 ggsave(locationplotNoB, filename = "figs/locationplotnoB.png", device = "png")
-ggsave(locationplotPhaseNoB, filename = "figs/locationplotPhasenoB.png", device = "png")
-ggsave(locationsplotsNoB, filename = "figs/locationsplotsNoB.png", device = "png")
+ggsave(locationplotNoBNoHelge, filename = "figs/locationplotnoBNH.png", device = "png")
+ggsave(locationplotPhaseNoBNoHelge, filename = "figs/locationplotPhasenoBNH.png", device = "png")
+ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", device = "png")
 
 
 # Correlation matrix for categorical variables
