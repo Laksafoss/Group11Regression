@@ -25,28 +25,28 @@ if (fullrun) {
 }
 ```
 
-In this report we will attempt to understand if the whales are affected by the presence of the seismic ship. We will be considering the following variables as measures of the whales behaviour:
+In this report we will attempt to understand if the whales are affected by the presence of the seismic ship. We will be considering the following variables as measures of the whales behavior:
 
-* `Depth`: Depth of the whale in meters belows sea level
+* `Depth`: Depth of the whale in meters below sea level
 * `Call`: Whether a whale makes a call
-* `Click`: Wheter a whale makes a click
+* `Click`: Whether a whale makes a click
 * `Buzz`: Whether a whale makes a buzz
 * `ODBA`: Overall dynamic body acceleration
 * `VeDBA`: Vector dynamic body acceleration
 * `Strokerate`: Strokrate of tail of the whale
 
-As we are interested in modelling the whales behaviour these variables are all possible response variables in the final data analysis.  
+As we are interested in modelling the whales behavior these variables are all possible response variables in the final data analysis.  
 
 # Data clean up/preparation
 Before we can analyse the data we must clean up the data. The data set contains 1.058.507 data lines over 19 variables. From the description of the data in the problem description we can make the following initial changes:
 
 * Combine `Date` and `Hour` to a new single time object called `Datetime`.
-* Correct for positve `Depths` by substracting the maximum value from all values
+* Correct for positive `Depths` by subtracting the maximum value from all values
 * Encode -1 as NA for those variables, where it applies
 
 ### Duplicate observations 
 There are a few issues of duplicate observations. There were 16 identical observations and 4 observations which only differed sligthy in `Dist.to.Paamiut`. Looking at the table below we see that all 16 identical observations has `Dist.to.Paamiut` = NA.
-For the 16 identical observations, one of each duplicates was deleted from the data set. The observation pairs 9, 10 and 11, 12 only differs very slighty in `Dist.to.Paamiut` so two new observations with `Dist.to.Paamiut` equal to the mean of `Dist.to.Paamiut` in each pair and all other attributes the same were added instead.    
+For the 16 identical observations, one of each duplicates was deleted from the data set. The observation pairs 9, 10 and 11, 12 only differs very slightly in `Dist.to.Paamiut` so two new observations with `Dist.to.Paamiut` equal to the mean of `Dist.to.Paamiut` in each pair and all other attributes the same were added instead.    
 
 ```{r Duplicate_table, echo=FALSE}
 Alldups <- readRDS("outputs/AllDuplicates.RDS")
@@ -67,7 +67,7 @@ row_spec(9:12,background = "#fca9b6")
 
 ### NAs in `Strokerate`
 
-Examing `Strokerate` after these operations shows that it has 686 NA values. The time periodes where these NA values occur are shown in the table below.
+Examining `Strokerate` after these operations shows that it has 686 NA values. The time periods where these NA values occur are shown in the table below.
 
 ```{r Strokerate_NAs, echo=FALSE}
 NAStrokeDf <- readRDS("outputs/NAStrokeDf.RDS")
@@ -75,17 +75,37 @@ kable(NAStrokeDf) %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>% group_rows("NA intervals", 1, 3) %>%  group_rows("Time range for whole experiment", 4, 5) 
 ```
 
-We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full dataset we simply remove them.
+We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full data set we simply remove them.
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
-
-### NAs in `Dist.to.Paamiut`
 
 ### Sun as factor
 
-As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` varibale encoding whether or not the sun was up or down at the time. <br>
+As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` variable encoding whether or not the sun was up or down at the time. <br>
+
+### Checking correctnes of Long/Lat
+
+We plot Long/lat against each other and color it by Datetime, to see if there are som oddities.
+
+![](figs/locationplot.png){width=750px}
+
+As it seems that the whales are swiming "smoothly" around, we conclude that there are no obvious mistakes in the locations.  
+
+# Exploratory data analysis
+
+## Depth and phases:
+The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - it has more then a million data lines - and any fitting and plotting procedure will be a bit slow. 
+To reduce this enormous data set we will start by looking if we can aggregate the data in some meaning full way.
+
+By plotting the depth over time - colored according to phases - we see that the whales do a lot of short dives, and some very deep dives. We judge that there is no clear trend in time, nor any clear effect of the different phases. Considering the B phase as a control phase, there is also no clear difference before and during the experiments.
+
+![](figs/depthtimeplotPhases.png)
+
+![](figs/depthtimeplotPhasesNoB.png)
+
+However we see that it seems possible to easily distinguish between when whale is diving and when it is not, by categorizing each periode of time under some set depth to be a dive. We chose this depth to be 10 meters. 
 
 ### Aggregrating the data
-The data we are considering is in fact time series data and as such it is not well suited for the types of models we are interested in. Furthermore the data set is quite large - it has more then a million data lines - and any fitting and plotting procedure will be a bit slow. To deal with this we have aggregrated the data, such that each data line corresponds to 1 minut. This gives us a new data set with the following summary statistics
+Thus we aggregate the data such that each observations corresponds to 1 minute. This gives us a new data set with the following summary statistics:
 
 * `Ind`; factor;  whale name
 * `Start` date time; first time point in the group
@@ -93,12 +113,12 @@ The data we are considering is in fact time series data and as such it is not we
 * `Seismik` numeric; average number of seismic activity pr second
 * `Phase` factor; phase of the first observation
 * `Area` factor; area of the first observation
-* `Call` numeric; number of calls that minut
+* `Call` numeric; number of calls that minute
 * `Acou.qua` numeric; the average acoustic quality
 * `Dist.to.Paamiut` numeric; average distance to Paamiut 
-* `Dist.to.shore` numeric; average distance between the whale and the shor 
-* `Click` numeric; number of clicks that minut
-* `Buzz` numeric; number of buzz's that minut
+* `Dist.to.shore` numeric; average distance between the whale and the shore 
+* `Click` numeric; number of clicks that minute
+* `Buzz` numeric; number of buzz's that minute
 * `ODBA` numeric; average overall dynamic body acceleration
 * `VeDBA` numeric; average vector dynamic body acceleration
 * `StrokeRate` numeric; average stroke rate
@@ -108,13 +128,10 @@ The data we are considering is in fact time series data and as such it is not we
 * `Sun` factor; whether the sun was up or down at this time point 
 * `Dive` logical; whether the whale was diving (diving starts at 10 meters)
 
-
-# Exploratory data analysis
-
-Now that we have our final dataset of 17.632 observations we can take a more detailed look at the individual variables. As the dataset consits of 20 variables, we will plot and analyze these variables in groups. 
+Which yields a data set of 17.632 observations. As the data set consists of 20 variables, we will plot and analyze these variables in groups. 
 
 ### The potential response variables
-Let us first look at our potential respons variables. 
+Let us first look at our potential response variables. 
 
 ```{r new_data_readin, include=FALSE}
 narwhal <- readRDS("outputs/narwhal_Minut.RDS")
@@ -133,7 +150,7 @@ We note that
 * `Call` and `Buzz` are close in their distribution of 0/1 but `Click` are not.
 * `Strokerate` are positive and the plot is "jagged" because it is integers only.
 
-We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as they are all measurements of movement speed. We plot the spearman correlations:
+We suspect that `ODBA`, `VeDBA` and `Strokrate` could be linearly correlated as they are all measurements of movement speed. We plot the Spearman correlations:
 
 ![](figs/correlationmatrixnum.png){width=500px}
 
@@ -152,7 +169,7 @@ We note that
 
 * We have more observations on the whale "Helge" than on "Thor"
 * `Acou.qua` are almost always "G".
-A correlation plot for the categorical variables gives the impression that there is no extreme correlation betwwen the categorical variables:
+A correlation plot for the categorical variables gives the impression that there is no extreme correlation between the categorical variables:
 
 ![](figs/correlationmatrix.png)
 
@@ -172,29 +189,18 @@ summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
 
 ![](figs/numerical_densities_exp.png){width=750px}
 
-Since Lat and Long together determines an position we can't conclude anything about locations from looking at their densities. 
+Since Lat and Long together determines an position we can't conclude anything about locations from looking at their densities.
 
-![](figs/locationplot.png){width=750px}
-![](figs/locationsplotswNoB.png){width=750px}
-
-## Depth and phases:
-
-By plotting the depth over time - colored according to phases - we see that the whales do a lot of short dives, and some very deep dives. We judge that there is no clear trend in time, nor any clear effect of the different phases. Considering the B phase as a control phase, there is also no clear difference before and during the experiments.
-
-![](figs/depthtimeplotPhases.png)
-
-![](figs/depthtimeplotPhasesNoB.png)
-
+```{r include = FALSE}
 ### Conclusions and choices made from exploratory data analysis
-
-* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
-* By looking at `Depth` we can partion the data into distintive Dives.
-* **SOMETHING WITH NAs in DIST TO PAARMIUT**
+#* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
+#* By looking at `Depth` we can partion the data into distinctive Dives.
+#* **SOMETHING WITH NAs in DIST TO PAARMIUT**
 
 ### Choices made from exploratory data analysis
 
-* Remove `Dist.to.Paamiut`
-
+#* Remove `Dist.to.Paamiut`
+```
 
 ## Aggregation of phases
 
@@ -202,11 +208,11 @@ In the following data analysis, we will fit models to a factor consisting of the
 
 # Data Analysis and modeling
 
-We wish to examine whether or not the behaviour of the whales is affected by the boat and airgun.
+We wish to examine whether or not the behavior of the whales is affected by the boat and airgun.
 
-For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the true parameters of our various explanatory variables. 
+For this purpose we will fit a generalized linear models over our aggregated data sets and estimate the true parameters of our various explanatory variables. 
 
-In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. We will perform both Ridge regression and standard regression for each of the four variables.
+In the following we will present some different models with different response variables. We have chosen the four response variables `Depth`, `Click`, `Call` and `Strokerate`. We will perform both Ridge regression and standard regression for each of the four variables.
 
 We choose to present these four models as these were the order in which the models have been fitted, and in the following analysis it will be argued that the first three of these are unsatisfactory and hence will be disregarded. However, as the analysis will also show, our fourth model has a reasonable fit.
 
@@ -220,7 +226,7 @@ fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DA
 ```
 
 
-Fitting these models and simulating 8 new datasets with the fitted models as the true models yields the following plots:
+Fitting these models and simulating 8 new data sets with the fitted models as the true models yields the following plots:
 
 
 ![](figs/DepthNormalreg.png)
@@ -229,13 +235,13 @@ Fitting these models and simulating 8 new datasets with the fitted models as the
 ![](figs/DepthSubNormalreg.png)
 
 
-Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset.
+Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original data set.
 
-The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable dataseet, and so we also disregard these models.
+The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable data set, and so we also disregard these models.
 
 ## Strokerate model
 
-Similary, we fit a generalized linear model now with the Strokerate variable as response:
+Similarly, we fit a generalized linear model now with the `Strokerate` variable as response:
 
 ```{r, eval = FALSE}
 fit.strokerate <- glm(StrokeRate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
@@ -248,15 +254,15 @@ fit.strokerate.sub <- glm(StrokeRate ~ Phasesub + Area + Ind + Los + Sun + ODBA,
 
 ![](figs/StrokerateSubNormalreg.png)
 
-While the original dataset is still distinguishable among the 8 simulated datasets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
+While the original data set is still distinguishable among the 8 simulated data sets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
 
 
 
 ## Conclusion
 
-Our analysis of the dataset started out with a thought cleaning of the data. Firtsly, we combined some variables, removed colinear variables and aggregated the data into intervals, so that the dataset did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
+Our analysis of the data set started out with a thought cleaning of the data. Firstly, we combined some variables, removed co-linear variables and aggregated the data into intervals, so that the data set did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
 
-We then continued into the analysis of our dataset. We tested various models for our selected response variables, but only the model of strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
+We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the model of Strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
 
 
 ## Appendix
@@ -266,10 +272,10 @@ We then continued into the analysis of our dataset. We tested various models for
 
 
 ### Missing values
-As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+As already mentioned the data set has quite a lot of missing values. In order to examine whether there is some systematize behind which values are missing, we plot the intersection of missing values:
 ![](figs/Missing_Values_Overview.png)
 
-We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
+We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a function of the phases (except for `Dist.to.Paamiut`):
 
 ![](figs/Missing_values_phase.png)
 
