@@ -53,21 +53,11 @@ narwhal <- rbind(newrows[c(1,3),],narwhal)
 saveRDS(newrows[c(1,3),], file = "outputs/TwoDuplicates.RDS")
 
 
-## FIX NAs in ODBS Snd VeDBA
-NaODBAVedba <- narwhal %>% filter(is.na(VeDBA) | is.na(ODBA))
-# Run to see that it actually are the first 7
-#narwhal %>% filter(Ind == "Thor",
-#                   between(Datetime,
-#                           min(NaODBAVedba$Datetime)-10,
-#                           max(NaODBAVedba$Datetime)+10)) %>% arrange(Datetime)
-
-# Remove them
+## FIX NAs in ODBS Snd VeDBA by Removing them
 narwhal <- narwhal %>% filter(!is.na(ODBA))
 
 ## FIX NAs in Strokerate
-### Remove Helge because they are the first 
-narwhal <- narwhal %>% filter(!(Ind == "Helge" & is.na(Strokerate)))
-
+### First we see that it's the first and last rows. Then we remove them.
 NaStroke <- narwhal %>% mutate(index = 1:NROW(narwhal)) %>%
   filter(is.na(Strokerate)) %>%
   group_by(Ind) %>%
@@ -75,35 +65,16 @@ NaStroke <- narwhal %>% mutate(index = 1:NROW(narwhal)) %>%
            cut(index, c(-Inf, index[which(diff(index) > 1 )] + 0.5, Inf)
                , include.lowest = TRUE)) %>% 
   group_by(NAgroup) %>% 
-  summarise(min = min(Datetime),
-            max = max(Datetime))
-
+  summarise(Ind = factor(Ind[1]),
+            start = min(Datetime),
+            end = max(Datetime),
+            duration = n())
 NaStrokeDF <- data.frame(NaStroke)
+saveRDS(NaStrokeDF, file = "outputs/NAStrokeDf.RDS")
 
-intervalEndValue <- min(narwhal[narwhal$Ind == "Thor" & 
-              narwhal$Datetime ==  NaStrokeDF[1,"max"]+1, "Strokerate"])
-bet <- between(narwhal$Datetime, NaStrokeDF[1,"min"],NaStrokeDF[1,"max"])
-narwhal[bet & narwhal$Ind ==  "Thor", "Strokerate"] <- intervalEndValue
-
-intervalStartValue <- narwhal[narwhal$Ind == "Thor" & 
-                                  narwhal$Datetime ==  NaStrokeDF[2,"min"]-1, "Strokerate"]
-intervalStartValue
-narwhal[bet,"Strokerate"]
-bet <- between(narwhal$Datetime, NaStrokeDF[2,"min"],NaStrokeDF[2,"max"])
-narwhal[bet & narwhal$Ind ==  "Thor", "Strokerate"] <- intervalStartValue
-
-## 
-narwhal %>% filter(Ind == "Thor",
-                   between(Datetime,
-                           min(NaODBAVedba$Datetime)-10,
-                           max(NaODBAVedba$Datetime)+10)) %>% arrange(Datetime)
-
-# They are the first seven observations. Remove them
-narwhal <- narwhal[-(1:7),]
-
+narwhal <- narwhal %>% filter(!is.na(Strokerate))
 # Save
 narwhal <- narwhal %>% ungroup()
-
 
 ## ==  STEP 2 : CREATE SUMMARIZED DATASETS  ====================================
 
@@ -122,7 +93,7 @@ find_sub_data <- function(x) {
               Dist.to.Paamiut = mean(Dist.to.Paamiut, na.rm = T),
               Dist.to.shore = mean(Dist.to.shore),
               Click = sum(as.numeric(Click) - 1, na.rm = T),
-              Buzz = sun(as.numeric(Call) - 1, na.rm = T),
+              Buzz = sum(as.numeric(Call) - 1, na.rm = T),
               ODBA = mean(ODBA, na.rm = T),
               StrokeRate = mean(Strokerate, na.rm = T),
               Los = first(Los),
