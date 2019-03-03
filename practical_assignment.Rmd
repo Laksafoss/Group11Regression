@@ -218,20 +218,27 @@ To answer our scientific question we are in fact only really interested in the e
 effects of the `Phase` variable, as this is the variables that encodes the presence of the
 Paamiut ship and shooting. We do however keep as many explanatory variables in the model as possible to adjust for potential confounders between the responses of interest and `Phase`. 
 
-```{r}
-narwhal$Phasesub <- narwhal$Phase
-levels(narwhal$Phasesub) <- list("B" = c("B"),
-                              "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
-                              "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
-```
-
-
 We will however never allow one of the responsvariables to be an explanatory variable in 
 another model. 
 
-To judge goodness of fit we will look at residual plots. We will plot the observed residual
-plot among 8 residual plots based on data simulated under the model. 
+As the current `Phase` variable has multiple shoting phases we are in fact more 
+interested in the variable `Phasesub` which we create below. This new variable
+collapses all T-phases (boat is present and shooting) and I-phases (boat is present and not shooting).  
 
+```{r}
+narwhal$Phasesub <- narwhal$Phase
+levels(narwhal$Phasesub) <- list("B" = c("B"),
+                                 "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
+                                 "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
+```
+
+
+To judge goodness of fit we will look at residual plots. We will plot the observed residual
+plot among 8 residual plots based on data simulated under the model. If we judge the fit 
+to be adequate we will then compare this model to the submodel where we use the `Phasesub` 
+variable instead of `Phase`. This comparison is done via a Likelihood Ratio Test. If this test 
+suggests that the submodel can not be rejected we will accept this new model with `Phasesub`
+and report estimated effect of the B, T and I phases. 
 
 In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. 
 
@@ -287,16 +294,20 @@ anova(fit.strokerate, fit.strokerate.sub, test = "LRT")
 ```
 
 
-
-
-
-
+We see that the Likelihood ratio test rejects the submodel. Hence we must stay 
+with the larger model that does not allow us to conclude anything about the effect 
+of the boat or shooting on the whales. 
 
 ## Conclusion
 
-Our analysis of the data set started out with a thought cleaning of the data. Firstly, we combined some variables, removed co-linear variables and aggregated the data into intervals, so that the data set did no longer consist of time series data. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
+Our analysis of the data set started out with a thought cleaning of the data. Firstly, we combined some variables, removed co-linear variables and aggregated the data into intervals. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
 
 We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the model of Strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
+
+As we were not able to test down into the submodel with `Phasesub` in any of the four models
+we were not able to make any conclusions on the effect of the boat or shooting the the behavior 
+of the whales. 
+
 
 ```{r, include = FALSE}
 ## Appendix
