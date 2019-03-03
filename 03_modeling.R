@@ -96,10 +96,10 @@ fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DA
 anova(fit.depth, fit.depth.sub, test = "LRT") # Likelihood ratio test
 anova(fit.depth, fit.depth.sub, test = "Cp")  # like AIC
 
-png("figs/DepthNormalreg")
+png("figs/DepthNormalreg.png")
 residualplotter(fit.depth, 3,3)
 dev.off()
-png("figs/DepthSubNormalreg")
+png("figs/DepthSubNormalreg.png")
 residualplotter(fit.depth.sub, 3,3)
 dev.off()
 
