@@ -1,0 +1,21 @@
+---
+title: "Feedback, obligatory assignment"
+author: 
+date: 
+output: html_document
+---
+
+
+Divide your feedback into two: major and minor comments, and enter them "chronologically". Remember that you are not evaluating the assignment - you're trying to help the authors improve it.
+
+### Major comments
+
+- These are substantial suggestions
+- Enter them chronologically
+
+### Minor comments
+
+- These are minor things, e.g. typos
+- Enter then chronologically as well
+
+And remember PEP!
