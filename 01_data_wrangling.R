@@ -94,19 +94,26 @@ find_sub_data <- function(x) {
               Seismik = mean(as.numeric(Seismik) - 1, na.rm = T),
               Phase = first(Phase),
               Area = first(Area),
-              Call = sum(as.numeric(Call) - 1, na.rm = T),
               Acou.qua = mean(as.numeric(Acou.qua) - 1, na.rm = T),
               Dist.to.Paamiut = mean(Dist.to.Paamiut, na.rm = T),
               Dist.to.shore = mean(Dist.to.shore),
-              Click = sum(as.numeric(Click) - 1, na.rm = T),
-              Buzz = sum(as.numeric(Buzz) - 1, na.rm = T),
+              CallSum = sum(as.numeric(Call) - 1, na.rm = T),
+              ClickSum = sum(as.numeric(Click) - 1, na.rm = T),
+              BuzzSum = sum(as.numeric(Buzz) - 1, na.rm = T),
               ODBA = mean(ODBA, na.rm = T),
               VeDBA = mean(VeDBA, na.rm = T),
               Strokerate = mean(Strokerate, na.rm = T),
               Los = mean(as.numeric(Los)-1, na.rm = T),
               Lat = mean(Lat, na.rm = T),
               Long = mean(Long, na.rm = T),
-              Sun = mean(as.numeric(Sun)-1, na.rm = T)
+              Sun = mean(as.numeric(Sun)-1, na.rm = T),
+              CallMean = mean(as.numeric(Call) - 1, na.rm = T),
+              ClickMean = mean(as.numeric(Click) - 1, na.rm = T),
+              BuzzMean = mean(as.numeric(Buzz) - 1, na.rm = T),
+              CallMax = max(as.numeric(Call) - 1, na.rm = T),
+              ClickMax = max(as.numeric(Click) - 1, na.rm = T),
+              BuzzMax = max(as.numeric(Buzz) - 1, na.rm = T)
+              
     )
   X <- X[ ,-1]
   X$Dive <- X$Depth > 10
