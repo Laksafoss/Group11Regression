@@ -18,8 +18,8 @@ output: html_document
 -  The auto correlation plots are a really good idea to determine the lag size! Overall, you do a very thorough analysis of correlation.
 
 ### Minor comments
-**Introduction**
-A small introduction, possibly including what questions you are interrested in answering.  
+**Introduction**:
+A small introduction, possibly including what questions you are interrested in answering, would be nice.  
   
 **Aggregation of data set:**
 You could - as you point out yourselves - choose to aggregate data over the 30 minute intervals, instead of just taking one of the end-point observations. The risk of doing what you do is that skewed distributions may become even more skewed. For example, when you have only 0.41% of data points with Call=1, it is probably a coincidence that Call=1 is even represented in your new data set.
