@@ -9,6 +9,17 @@ output: html_document
 Divide your feedback into two: major and minor comments, and enter them "chronologically". Remember that you are not evaluating the assignment - you're trying to help the authors improve it.
 
 ### Major comments
+- You should reencode all -1 as NA before any analysis and plotting ! 
+    - when plotting the densities of dist.to.Paamiut, dist.to.shore there is a large point mass in -1, 
+      which would not have bben there, had you set -1 as NA
+    - we would also remove -1 when plotting ODBA, VeDBA and strokerate. This is however a smaller error.
+    - when leaving in -1 all correlations with a variable with NA becomes wrong. This is most clear with 
+      the Lat/Long correlation since the correct values of Lat/Long are around 70/-26 and the NA's are set to -1,
+      the interpreation of the correlation coefficient -0.98 is nore correctly interpreted as "Lat and Long are NA
+      at the same times". If you calculate the correlation without the -1 you fint that it is 0.6 !
+
+- Under header "Analysis" there is almost no text.
+
 
 - These are substantial suggestions
 - Enter them chronologically
