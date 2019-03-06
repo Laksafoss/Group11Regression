@@ -69,14 +69,14 @@ NaStroke <- narwhal %>% mutate(index = 1:NROW(narwhal)) %>%
             start = min(Datetime),
             end = max(Datetime),
             duration = n())
-NaStrokeDF <- data.frame(NaStroke)
+NAStrokeDF <- data.frame(NaStroke)
 fullDF <- data.frame(Ind = c("Thor","Helge"),
                      start = c(min(narwhal[narwhal$Ind == "Thor","Datetime"]),
                                min(narwhal[narwhal$Ind == "Helge","Datetime"])),
                      end = c(max(narwhal[narwhal$Ind == "Thor","Datetime"]),
                              max(narwhal[narwhal$Ind == "Helge","Datetime"])),
                      duration = c(NA,NA))
-NaStrokeDF <- rbind(NAStrokeDf[,2:5], fullDF)
+NaStrokeDF <- rbind(NAStrokeDF[,2:5], fullDF)
 saveRDS(NaStrokeDF, file = "outputs/NAStrokeDf.RDS")
 
 narwhal <- narwhal %>% filter(!is.na(Strokerate))
@@ -99,14 +99,14 @@ find_sub_data <- function(x) {
               Dist.to.Paamiut = mean(Dist.to.Paamiut, na.rm = T),
               Dist.to.shore = mean(Dist.to.shore),
               Click = sum(as.numeric(Click) - 1, na.rm = T),
-              Buzz = sum(as.numeric(Call) - 1, na.rm = T),
+              Buzz = sum(as.numeric(Buzz) - 1, na.rm = T),
               ODBA = mean(ODBA, na.rm = T),
               VeDBA = mean(VeDBA, na.rm = T),
               Strokerate = mean(Strokerate, na.rm = T),
-              Los = first(Los),
+              Los = mean(as.numeric(Los)-1, na.rm = T),
               Lat = mean(Lat, na.rm = T),
               Long = mean(Long, na.rm = T),
-              Sun = first(Sun)
+              Sun = mean(as.numeric(Sun)-1, na.rm = T)
     )
   X <- X[ ,-1]
   X$Dive <- X$Depth > 10
