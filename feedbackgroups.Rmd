@@ -19,6 +19,23 @@ Divide your feedback into two: major and minor comments, and enter them "chronol
 
 ### Minor comments
 
+  
+Aggregation of data set:
+You could - as you point out yourselves - choose to aggregate data over the 30 minute intervals, instead of just taking one of the end-point observations. The risk of doing what you do is that skewed distributions may become even more skewed. For example, when you have only 0.41% of datapoints with Call=1, it is probably a coincidence that Call=1 is even represented in your new data set.
+
+Skewed distributions:
+It is correct that the distributions of e.g. Call is very skewed, but if you have time, it could be interesting to look at/comment on whether Call = 1 is represented more often at certain times (e.g. in Trial phases)
+
+Dharma package:
+As we don't know the Dharma-package and the plots it produces, it would be really nice if you could describe what the package does, how the plots  are created and how they are interpreted. For example, the Q-Q plots it generates are not standard Q-Q plots.
+
+Autocorrelation plots:
+The autocorrelation plots are a really good idea to determine the lag size! Overall, you do a very thorough analysis of correlation
+
+Fitted models:
+If you have time, it would be nice if you could write something about the other models you have fitted
+
+
 - These are minor things, e.g. typos
 - Enter then chronologically as well
 
