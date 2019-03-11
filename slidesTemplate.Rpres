@@ -1,0 +1,47 @@
+slidesTemplate
+========================================================
+author: 
+date: 
+autosize: true
+
+Slide 1
+========================================================
+
+An easy way to make slides that contain R output is to use the .Rpres format. This uses RMarkdown and outputs an .html-file that can be opened using a browser. In the Presentation tab in RStudio you can choose View in Browser to preview your slide show (while you're working you can just preview your slides in RStudio by choosing Preview). Do this to ensure that everything looks good as the RStudio preview can differ from viewing the file in a browser. When you're done, you can (again in the Presentation tab) choose Save As Web Page to save an .html-file.
+
+For more details on the .Rpres format: <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+Some example code follows on the next slides.
+
+Bullet points
+========================================================
+
+- Hyphens create bullets
+- Another bullet
+- A third bullet
+
+
+Code and output
+========================================================
+
+You can either hide or show both code and R output.
+
+```{r}
+set.seed(1)
+x <- rnorm(10)
+y <- rnorm(10)
+model <- lm(y ~ x)
+coef(model)
+```
+
+Remember that your slides should be informative. For instance, code may be difficult to read on a slide and should therefore only be included if the code helps you make a point.
+
+
+Plots
+========================================================
+
+You can easily include plots as well.
+
+```{r, echo=FALSE}
+plot(x, y)
+```
