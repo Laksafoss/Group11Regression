@@ -4,7 +4,6 @@ author: "Anders Christensen, Anna Damkjaer Laksafoss and Stefan Bruhn Rasmussen"
 date: "February 21, 2019"
 output:
   html_document: default
-  pdf_document: default
 editor_options:
   chunk_output_type: console
 ---
@@ -86,6 +85,7 @@ Thus the first 578 and last 76 observations are removed from "Thor" and the firs
 ### Other missing values
 
 However, the dataset still has missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+
 ![](figs/Missing_Values_Overview.png)
 
 We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. 
@@ -188,14 +188,15 @@ narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 ```{r sum_response}
 summary(narwhal[,c("Depth", "Strokerate", "CallSum", "ClickSum")])
 ```
+
 ![](figs/numerical_densities_resp.png){width=750px}
 
 First of all we not that all these variables take values on the positive reals and hence when fitting we should only consider GLM's where the conditional distribution of our responses takes values on the positive reals. Examples of such distributions are the Poisson, Gamma, Binomial. Regarding the individual potential response variables we note that
 
-* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. When fitting, it would probably be a good idea to use a transformation to control the skewness of `Depth`. Below we have plottet log of `Depth` and in this plot the is no heavy tails. 
-* `Strokerate` has a rather nice marginal distribution. There might be a small tail to the right. 
-* `ClickSum` is extreemly bi-modal. We create a binary version of this variable, where all values above 20 is set to 1 and all values below are set to 0. We call this new variable `ClickBi` and it should be model using the binomial family.
-* `CallSum` is very skewed. We found no obviuos transformation to do. 
+* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. When fitting, it would probably be a good idea to use a transformation to control the skewness of `Depth`. Below we have plottet log of `Depth` and in this plot the is no heavy tails. In the fitting we will use a Gamma distribution with the log link to model the conditional distribution of `Depth`.
+* `Strokerate` has a rather nice marginal distribution. There might be a small tail to the right. We will use a Poisson distribution with the cononical log link to model the conditional distribution of `Strokerate`.
+* `ClickSum` is extreemly bi-modal. We create a binary version of this variable, where all values above 20 is set to 1 and all values below are set to 0. We call this new variable `ClickBi` and it should be model using the Binomial distribution with a logit link.
+* `CallSum` is very skewed. We found no obviuos transformation to do. As `CallSum` is allowed to be zero we can not use the Gamma distribution. In stead we will use the Poisson distribution with a log link to model the conditional distribution of `CallSum`.
 
 ![](figs/logDepth.png){width=750px}
 
@@ -226,7 +227,7 @@ Therefor we remove the variable `Seismik` from the data set.
 ### The numeric explanatory variables
 Lastly we turn to the only numerical explanatory variable. 
 ```{r sum_num_explanatory}
-summary(narwhal[,c("Dist.to.shore","OBDA")])
+summary(narwhal[,c("Dist.to.shore","ODBA")])
 ```
 
 ![](figs/numerical_densities_exp.png){width=750px}
@@ -240,11 +241,11 @@ We see that both `Dist.to.shore` and `ODBA` have tailes to the right. It could b
 
 We have chosen to work with the factor `Phasesub` in stead of `Phase`. `Phasesub` is a coarser factor then `Phase`, differentiating only between whether we are in an B, T or I Phase and not the phasenumber. It is created in the following way
 
-```{r, eval = FALSE}
-narwhal$Phasesub <- factor(narwhale$Phase, ordered = F) 
-levels(narwhale$Phasesub) <- list("B" = c("B"),
-                                  "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
-                                  "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
+```{r}
+narwhal$Phasesub <- factor(narwhal$Phase, ordered = F) 
+levels(narwhal$Phasesub) <- list("B" = c("B"),
+                                 "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
+                                 "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
 ```
 
 This choise is made, as `Phasesub` is better suited to answer our scientific question. We can the interpret the estimated effect of `Phasesub` equal to I as the effect of the boat, and the estimates effect of `Phasesub` equal to T as the effect of the boat and seismic activity together.  
@@ -254,56 +255,37 @@ This choise is made, as `Phasesub` is better suited to answer our scientific que
 
 We wish to examine whether or not the behavior of the whales is affected by the boat and airgun.
 
-For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the effect of our various explanatory variables. In all four models we choose
-the Poisson distribution with the log link to describe the conditional distribution of 
-our response variables given our explanatory variables. The Poisson distribtion is chosen as 
-all four variables `Depth`, `Click`, `Call` and `strokerate` takes values on the positive
-reals and moreover both `Click` and `Call`are indeed counting variables. 
+For this purpose we will fit a generalized linear models over our aggregated datasets and estimate the effect of our various explanatory variables on our 4 respons variables. In the section "The potential response variables" we decided to use the following regression models
 
-To answer our scientific question we are in fact only really interested in the estimated
-effects of the `Phase` variable, as this is the variables that encodes the presence of the
-Paamiut ship and shooting. We do however keep as many explanatory variables in the model as possible to adjust for potential confounders between the responses of interest and `Phase`. 
+* `Depth` Gamma distibution with log link
+* `ClickBi` Binomial distribution with logit link
+* `CallSum` Poisson distribution with log link 
+* `Strokerate` Poisson distribution with log link
 
-We will however never allow one of the responsvariables to be an explanatory variable in 
-another model. 
+To answer our scientific question we are in fact only really interested in the estimated effects of the `Phasesub` variable, as this is the variables that encodes the presence of the Paamiut ship and shooting. We do however keep as many explanatory variables in the model as possible to adjust for potential confounders between the responses of interest and `Phasesub`. 
 
-As the current `Phase` variable has multiple shoting phases we are in fact more 
-interested in the variable `Phasesub` which we create below. This new variable
-collapses all T-phases (boat is present and shooting) and I-phases (boat is present and not shooting).  
+We will however never allow one of the respons variables to be an explanatory variable in another model. 
 
-```{r}
-narwhal$Phasesub <- narwhal$Phase
-levels(narwhal$Phasesub) <- list("B" = c("B"),
-                                 "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
-                                 "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
-```
+To judge goodness of fit we will look at residual plots. We will plot the observed residual plot among 8 residual plots based on data simulated under the model. If the is sufficient goodness of fit we will report the estimated effect of the B, T and I phases. 
 
 
-To judge goodness of fit we will look at residual plots. We will plot the observed residual
-plot among 8 residual plots based on data simulated under the model. If we judge the fit 
-to be adequate we will then compare this model to the submodel where we use the `Phasesub` 
-variable instead of `Phase`. This comparison is done via a Likelihood Ratio Test. If this test 
-suggests that the submodel can not be rejected we will accept this new model with `Phasesub`
-and report estimated effect of the B, T and I phases. 
-
-In the following we will present some different models with different response variables. We have chosen the four response variables Depth, Click, Call and Strokerate. 
 
 
-## Model 1: Depth (And Click / Call models)
 
-We fit a generalized linear model with Depth as a response variable. We choose the exponential family to be the Poisson family, as the `Depth` variable takes values on the positive reals 
-and could seem to have 
+## Model 1: Depth
 
+We fit our Depth model.
 
 ```{r}
-fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
+fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore,                  data = narwhal, family = Gamma(link = "log"))
 ```
 
+In the below plot we have the residual plot of the observed data along with 8 residual plots created from simulated data.
 
-Fitting these models and simulating 8 new data sets with the fitted models as the true models yields the following plots:
+
+![](figs/GammaLogDepth.png)
 
 
-![](figs/DepthNormalreg.png)
 
 Quite clearly in this plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset. 
 
@@ -314,40 +296,48 @@ Quite clearly in both plots, one of the residual plots vary from the others. We 
 
 The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable data set, and so we also disregard these models.
 
-## Strokerate model
+## Model 2: ClickBi
 
-Similary, we fit a generalized linear model now with the Strokerate variable as response:
+We fit our Click model.
 
 ```{r}
-fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
+fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = narwhal, family = "binomial")
+```
+
+![](figs/ClickBiBin.png)
+
+
+
+
+
+## Model 3: CallSum
+
+We fit our Call model.
+
+```{r}
+fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = narwhal, family = "poisson")
+```
+
+
+![](figs/CallSumPoisson.png)
+
+
+
+
+
+## Model 4: Strokerate
+
+We fit our strokerate model.
+
+```{r}
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = narwhal, family = "poisson")
 ```
   
-
-
-![](figs/StrokerateNormalreg.png)
-
-![](figs/StrokerateSubNormalreg.png)
+![](figs/PoissonStrokerate.png)
 
 While the original data set is still distinguishable among the 8 simulated data sets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
 
-For now, however, we will create the submodel and plot residuals
 
-```{r}
-fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = narwhal, family = "poisson")
-```
-
-![](figs/StrokerateSubNormalreg.png)
-
-Again the observed residual plot is identifiable, but we will accept the fit.
-
-```{r}
-anova(fit.strokerate, fit.strokerate.sub, test = "LRT")
-```
-
-
-We see that the Likelihood ratio test rejects the submodel. Hence we must stay 
-with the larger model that does not allow us to conclude anything about the effect 
-of the boat or shooting on the whales. 
 
 ## Conclusion
 
