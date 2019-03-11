@@ -143,7 +143,7 @@ narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 
 
 ```{r sum_response}
-summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate", "Call", "Click", "Buzz")])
+summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate")])
 ```
 ![](figs/numerical_densities_resp.png){width=750px}
 
@@ -157,8 +157,8 @@ that `ODBA` and `VeDBA` are correlated with correlation coefficient 0.997, and t
 `Call` and `Buzz` are in fact totally correlated with a correlation coefficient of 1. 
 
 ```{r}
-cor(narwhal$ODBA, narwhal$VeDBA)
-cor(narwhal$Call, narwhal$Buzz)
+#cor(narwhal$ODBA, narwhal$VeDBA)
+#cor(narwhal$Call, narwhal$Buzz)
 ```
 
 This leads us the remove `VeDBA` and `Buzz` from the dataset.
