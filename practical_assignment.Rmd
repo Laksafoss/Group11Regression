@@ -79,6 +79,24 @@ kable(NAStrokeDf) %>%
 We see that Helge only has NAs in the first 32 measurements. Thor has in the first 578 measurements and the last 76 measurements. We assume that the first NAs are because the experiments were not yet properly started and the last are from the experiment "winding down". As these observations are such a small fraction of the full data set we simply remove them.
 Thus the first 578 and last 76 observations are removed from "Thor" and the first 32 observations are removed from "Helge".
 
+### Other missing values
+
+However, the dataset still has missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+![](figs/Missing_Values_Overview.png)
+
+We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. 
+
+To check whether there is any system as to when the NA's for `Dist.to.Paamiut` appear, we make a table with percentage of how many values are present in a given phase (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
+
+![](figs/PercentageTable.png)
+
+This table shows that except for the B-phase (and the missing datapoints for Thor), there is no tendency in when the `Dist.to.Paamiut` values are missing.
+
+In order to check when missing values appear for other variables, we plot the number of missing variables for the other variables with a somewhat large amount of NAs, separated by phases:
+
+![](figs/Missing_values_phase.png)
+
+Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`.
 
 
 ### Sun as factor
@@ -329,30 +347,7 @@ of the whales.
 ```{r, include = FALSE}
 ## Appendix
 
-### Plots with no clear position yet.
 
-
-
-### Missing values
-#However, the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
-#![](figs/Missing_Values_Overview.png)
-
-#We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. 
-
-#To check whether there is any system as to when the NA's for `Dist.to.Paamiut` appear, we make a table with percentage of how many values are present in a given phase (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
-
-#![](PercentageTable.png)
-
-#This table shows that except for the B-phase (and the missing datapoints for Thor), there is no tendency in when the `Dist.to.Paamiut` values are missing.
-
-#In order to check when missing values appear for other variables, we plot the number of missing variables for the other variables with a somewhat large amount of NAs, separated by phases:
-
-#![](figs/Missing_values_phase.png)
-
-#Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`.
-
-
-#We see that except for the B phase, there is no clear tendency as to when values are present or not.
 #**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
 
 #```{r include=FALSE}
