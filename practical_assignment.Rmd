@@ -334,18 +334,23 @@ of the whales.
 
 
 ### Missing values
-#As already mentioned the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
+#However, the dataset has quite a lot of missing values. In order to examine whether there is some systematism behind which values are missing, we plot the intersection of missing values:
 #![](figs/Missing_Values_Overview.png)
 
-#We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. Further, in order to check when the missing values appear, we plot the number of missing variables as a funtion of the phases (except for `Dist.to.Paamiut`):
+#We see that almost all missing values are present in the `Dist.to.Paamiut` variable, and that there is no clear tendency that other variables are missing simultaneously. 
+
+#To check whether there is any system as to when the NA's for `Dist.to.Paamiut` appear, we make a table with percentage of how many values are present in a given phase (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
+
+#![](PercentageTable.png)
+
+#This table shows that except for the B-phase (and the missing datapoints for Thor), there is no tendency in when the `Dist.to.Paamiut` values are missing.
+
+#In order to check when missing values appear for other variables, we plot the number of missing variables for the other variables with a somewhat large amount of NAs, separated by phases:
 
 #![](figs/Missing_values_phase.png)
 
-#We see that none of the variables used in the model are missing.
+#Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`.
 
-#Lastly, we make a table for when `Dist.to.Paamiut` values are present (0 is no values present in the phase, 100 is all values present, NaN is when no observations belong to the corresponding whale):
-
-#![](PercentageTable.png)
 
 #We see that except for the B phase, there is no clear tendency as to when values are present or not.
 #**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
