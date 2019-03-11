@@ -66,6 +66,10 @@ group_rows("Replacement for rows 11 and 12", 22, 22) %>%
 row_spec(9:12,background = "#fca9b6") 
 ```
 
+
+
+
+
 ### NAs in `Strokerate`
 
 Examining `Strokerate` after these operations shows that it has 686 NA values. The time periods where these NA values occur are shown in the table below.
@@ -90,13 +94,14 @@ To check whether there is any system as to when the NA's for `Dist.to.Paamiut` a
 
 ![](figs/PercentageTable.png)
 
-This table shows that except for the B-phase (and the missing datapoints for Thor), there is no tendency in when the `Dist.to.Paamiut` values are missing.
+This table shows that except for the B-phase, there is no tendency in when the `Dist.to.Paamiut` values are missing if we split accordning to the phases. In the B-phase, however, there are **NO** `Dist.to.Paamiut` observations. Hence the observations are not missing at random and we do not wish to impute values. As almost 70\% of the observations in `Dist.to.Paamiut` are missing we will simply delete this variable from our data set.
+
 
 In order to check when missing values appear for other variables, we plot the number of missing variables for the other variables with a somewhat large amount of NAs, separated by phases:
 
 ![](figs/Missing_values_phase.png)
 
-Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`.
+Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`. 
 
 
 ### Sun as factor
@@ -142,24 +147,38 @@ Thus we aggregate the data such that each observations corresponds to 1 minute. 
 * `Seismik` numeric; average number of seismic activity pr second
 * `Phase` factor; phase of the first observation
 * `Area` factor; area of the first observation
-* `Call` numeric; number of calls that minute
 * `Acou.qua` numeric; the average acoustic quality
-* `Dist.to.Paamiut` numeric; average distance to Paamiut 
 * `Dist.to.shore` numeric; average distance between the whale and the shore 
-* `Click` numeric; number of clicks that minute
-* `Buzz` numeric; number of buzz's that minute
+* `CallSum` numeric; number of calls that minute
+* `ClickSum` numeric; number of clicks that minute
+* `BuzzSum` numeric; number of buzz's that minute
 * `ODBA` numeric; average overall dynamic body acceleration
-* `VeDBA` numeric; average vector dynamic body acceleration
+* `VeDBA` numeric; vector dynamic body acceleration
 * `StrokeRate` numeric; average stroke rate
 * `Los` factor; whether the whale was in the line of sight in the first observation
 * `Sun` factor; whether the sun was up or down at this time point 
-* `Dive` logical; whether the whale was diving (diving starts at 10 meters)
 
-Which yields a data set of 17.632 observations. As the data set consists of 20 variables, we will plot and analyze these variables in groups. 
+Which yields a data set of 17.632 observations. As the data set consists of 16 variables, we will plot and analyze these variables in groups. There are 575 missing data points in `Dist.to.shore`. As we discussed in our section on "other missing values" it seems that there is no problem in simply removing these data lines. 
+
+Hence our final complete data set has 17.057 observations in 16 variables. 
+
+
+### Strongly correlated variables
+Before we spend to much time inspecting each variable we examin if there are any of the variables, that are strongly correlated. 
+
+
+![](figs/correlationmatrix.png)
+
+On the left we see a correlation plot for the numerical variables. The variables `ODBA` and `VeDBA` are strongly correlated with a corelation coeficient of 0.997. We remove `VeDBA` to avoid collinearity. 
+
+
+On the right we see a correlation plot for the categorical variables. This plot gives the impression that there is no extreme correlation between most of the categorical variables. However `BuzzSum` and `ClickSum` are highly correlated. Moreover `BuzzSum` and `ClickSum` are both among our potential response variables, and as such modeling both of these would result in similar models. We remove `BuzzSum`.
+
+
 
 ### The potential response variables
 
-Let us first look at our potential respons variables. First we make density plots.
+Let us first look at our remaining potential respons variables. First we make density plots.
 
 ```{r new_data_readin, include=FALSE}
 narwhal <- readRDS("outputs/narwhal_Minut.RDS")
@@ -167,25 +186,18 @@ narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 
 
 ```{r sum_response}
-summary(narwhal[,c("Depth", "ODBA", "VeDBA", "Strokerate")])
+summary(narwhal[,c("Depth", "Strokerate", "CallSum", "ClickSum")])
 ```
 ![](figs/numerical_densities_resp.png){width=750px}
 
-We note that
+First of all we not that all these variables take values on the positive reals and hence when fitting we should only consider GLM's where the conditional distribution of our responses takes values on the positive reals. Examples of such distributions are the Poisson, Gamma, Binomial. Regarding the individual potential response variables we note that
 
-* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. 
-* `ODBA` and `VeDBA` are on the same magnitude and both have some negative values.
+* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. When fitting, it would probably be a good idea to use a log link to control the skewness of `Depth`. 
+* `Strokerate` has a rather nice marginal distribution. There might be a small tail to the right. 
+* `ClickSum` is extreemly bi-modal. We create a binary version of this variable, where all values above 20 is set to 1 and all values below are set to 0. We call this new variable `ClickBi` and it should be model using the binomial family.
+* `CallSum` is very skewed. 
 
-Now we consider the correlation between these variables and most notably we find
-that `ODBA` and `VeDBA` are correlated with correlation coefficient 0.997, and that
-`Call` and `Buzz` are in fact totally correlated with a correlation coefficient of 1. 
 
-```{r}
-cor(narwhal$ODBA, narwhal$VeDBA)
-cor(narwhal$Call, narwhal$Buzz)
-```
-
-This leads us the remove `VeDBA` and `Buzz` from the dataset.
 
 
 ### The categorical explanatory variables
@@ -199,9 +211,6 @@ We note that
 
 * We have more observations on the whale "Helge" than on "Thor"
 * `Acou.qua` are almost always "G".
-A correlation plot for the categorical variables gives the impression that there is no extreme correlation between the categorical variables:
-
-![](figs/correlationmatrix.png)
 
 Therefore the above plot does not force us to disregard any of the variables.
 
@@ -216,14 +225,14 @@ kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width
 
 
 ### The numeric explanatory variables
-Lastly we turn to the numerical explanatory variables. 
+Lastly we turn to the only numerical explanatory variable. 
 ```{r sum_num_explanatory}
-summary(narwhal[,c("Dist.to.Paamiut", "Dist.to.shore", "Lat", "Long")])
+summary(narwhal[,c("Dist.to.shore","OBDA","VeDBA")])
 ```
 
 ![](figs/numerical_densities_exp.png){width=750px}
 
-Since Lat and Long together determines an position we can't conclude anything about locations from looking at their densities.
+
 
 ```{r include = FALSE}
 ### Conclusions and choices made from exploratory data analysis
