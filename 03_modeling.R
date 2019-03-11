@@ -8,8 +8,9 @@ DATA <- readRDS("outputs/narwhal_Minut.RDS")
 #DATA <- readRDS("outputs/narwhal_TenMinut.RDS")
 #DATA <- readRDS("outputs/narwhal_Diving.RDS")
 
-DATA <- DATA[,c("Ind", "Start", "Depth", "Seismik", "Phase", "Area", "Acou.qua", "Dist.to.shore", "CallSum", "CallMean", "CallMax",
-                "ClickSum", "ClickMean", "ClickMax", "BuzzSum", "BuzzMean", "BuzzMax", "ODBA", "Strokerate", "Los", "Sun")]
+DATA <- DATA[,c("Ind", "Start", "Depth", "Seismik", "Phase", "Area", "Acou.qua", "Dist.to.shore", "CallSum", "CallMean",
+                "CallMax","ClickBi", "ClickSum", "ClickMean", "ClickMax", "BuzzSum", "BuzzMean", "BuzzMax", 
+                "ODBA", "Strokerate", "Los", "Sun")]
 DATA <- DATA[complete.cases(DATA),]
 
 
@@ -19,11 +20,11 @@ levels(DATA$Phasesub) <- list("B" = c("B"),
                               "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
                               "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
 
-# create the desired model matrixs
-x <- model.matrix(~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua,
-                  data = DATA)
-xsub <- model.matrix(~ Phasesub + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua,
-                     data = DATA)
+## create the desired model matrices
+#x <- model.matrix(~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua,
+#                  data = DATA)
+#xsub <- model.matrix(~ Phasesub + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua,
+#                     data = DATA)
 
 
 
@@ -55,10 +56,11 @@ xsub <- model.matrix(~ Phasesub + Area + Ind + Los + Sun + ODBA + Dive + Acou.qu
 #
 #
 #
-# Setup for normal Gamma regression ===================================================
-residualplotter_Gamma <- function(fit, n, m) {
+# Setup for normal regression ===================================================
+residualplotter <- function(fit, n, m) {
   dat <- fit$data
   index <- sample(n*m, 1)
+  f <- fit$family
   plots <- lapply(seq_len(n * m), function(i) {
     if (i == index) {
       true <- ggplot2::fortify(fit)
@@ -67,7 +69,7 @@ residualplotter_Gamma <- function(fit, n, m) {
       y <- simulate(fit)[,1]
       form <- as.formula(
         paste0("y ~ ", grep("~", fit$formula, value = T, invert = T)[2]))
-      glm <- glm(form, data = cbind(y = y, dat), family = Gamma(link = "log"))
+      glm <- glm(form, data = cbind(y = y, dat), family = f)
       Diag <- ggplot2::fortify(glm)
       ggplot2::qplot(.fitted, .resid, data = Diag) + ggplot2::geom_smooth()
     }
@@ -76,7 +78,7 @@ residualplotter_Gamma <- function(fit, n, m) {
   marrangeGrob(plots, ncol = n, nrow = m)
 }
 
-# Setup for normal poisson regrssion ===================================================
+# Setup for normal poisson regression ===================================================
 residualplotter_poisson <- function(fit, n, m) {
   dat <- fit$data
   index <- sample(n*m, 1)
@@ -111,85 +113,71 @@ plot(fit.depth.sub)
 
 
 # normal regression
-fit.depth <- glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.depth.sub <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore, data = DATA, family = Gamma(link = "log"))
 
 
-anova(fit.depth, fit.depth.sub, test = "LRT") # Likelihood ratio test
-anova(fit.depth, fit.depth.sub, test = "Cp")  # like AIC
-
-png("figs/GammaDepthNormalreg.png")
+png("figs/GammaLogDepth.png")
 residualplotter(fit.depth, 3,3)
-dev.off()
-png("figs/GammaDepthSubNormalreg.png")
-residualplotter(fit.depth.sub, 3,3)
 dev.off()
 
 
 # Click model ==================================================================
 
 # Ridge regression
-fit.click <- netfitter(x, DATA$Click, train)
-plot(fit.click)
+#fit.click <- netfitter(x, DATA$Click, train)
+#plot(fit.click)
 
-fit.click.sub <- netfitter(xsub, DATA$Click, train)
-plot(fit.click.sub)
+#fit.click.sub <- netfitter(xsub, DATA$Click, train)
+#plot(fit.click.sub)
 
 
 # normal regression
-fit.click <- glm(Click ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "Gamma")
-fit.click.sub <- glm(SumClick ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = Gamma(link="log"))
+fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
 
-anova(fit.click, fit.click.sub, test = "LRT") # Likelihood ratio test
-anova(fit.click, fit.click.sub, test = "Cp")  # like AIC
+#anova(fit.click, fit.click.sub, test = "LRT") # Likelihood ratio test
+#anova(fit.click, fit.click.sub, test = "Cp")  # like AIC
 
+png("figs/ClickBiBin.png")
 residualplotter(fit.click, 3,3)
-residualplotter(fit.click.sub, 3,3)
-
+dev.off()
 
 
 # Call model ===================================================================
 
 # Ridge regression
-fit.call <- netfitter(x, DATA$Call, train)
-plot(fit.call)
+#fit.call <- netfitter(x, DATA$Call, train)
+#plot(fit.call)
 
-fit.call.sub <- netfitter(xsub, DATA$Call, train)
-plot(fit.call.sub)
+#fit.call.sub <- netfitter(xsub, DATA$Call, train)
+#plot(fit.call.sub)
 
 
 # normal regression
-fit.call <- glm(CallMax ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
-fit.call.sub <- glm(CallMax ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = "poisson")
+fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, 
+                data = DATA, family = "poisson")
 
-anova(fit.call, fit.call.sub, test = "LRT") # Likelihood ratio test
-anova(fit.call, fit.call.sub, test = "Cp")  # like AIC
+#anova(fit.call, fit.call.sub, test = "LRT") # Likelihood ratio test
+#anova(fit.call, fit.call.sub, test = "Cp")  # like AIC
 
+png("figs/CallSumPoisson.png")
 residualplotter(fit.call, 3,3)
-residualplotter_poisson(fit.call.sub, 3,3)
-
+dev.off()
 
 
 # Strokerate model =============================================================
 
 # Ridge regression
-no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
-fit.strokerate <- netfitter(x[,-no], DATA$StrokeRate, train)
-plot(fit.strokerate)
+#no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
+#fit.strokerate <- netfitter(x[,-no], DATA$StrokeRate, train)
+#plot(fit.strokerate)
 
-fit.strokerate.sub <- netfitter(xsub[,-no], DATA$StrokeRate, train)
-plot(fit.strokerate.sub)
+#fit.strokerate.sub <- netfitter(xsub[,-no], DATA$StrokeRate, train)
+#plot(fit.strokerate.sub)
 
 
 # normal regression
-fit.strokerate <- glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, data = DATA, family = Gamma(link = "log"))
-fit.strokerate.sub <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA, data = DATA, family = Gamma(link = "log"))
-an1ova(fit.strokerate.sub, fit.strokerate, test = "LRT") # Likelihood ratio test
-anova(fit.strokerate, fit.strokerate.sub, test = "Cp")  # like AIC11111
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = DATA, family = "poisson")
 
-png("figs/GammaStrokerateNormalreg.png")
+png("figs/PoissonStrokerate.png")
 residualplotter(fit.strokerate, 3,3)
-dev.off()
-png("figs/GammaStrokerateSubNormalreg.png")
-residualplotter(fit.strokerate.sub, 3,3)
 dev.off()
