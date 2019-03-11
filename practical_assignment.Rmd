@@ -103,13 +103,21 @@ Not surprisisingly, the Lat and Long variables are missing simultaneously, indic
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` variable encoding whether or not the sun was up or down at the time. <br>
 
-### Checking correctnes of Long/Lat
+### Longitude, Latitude and area
 
 We plot Long/lat against each other and color it by Datetime, to see if there are som oddities.
 
 ![](figs/locationplot.png){width=750px}
 
-As it seems that the whales are swiming "smoothly" around, we conclude that there are no obvious mistakes in the locations.  
+As it seems that the whales are swiming "smoothly" around, we conclude that there are no obvious mistakes in the locations. 
+
+Despite, even though the Lat/Long variables seem to have no obvious errors we have decidet not to include them in our models below. We suspect that the effect of Lat and Long is non-linear and that the interaction of the two variables have a non-linear effect. Including all of these effects in a suitable non-linear manner would require a large and complex model, which would be hard to interpret. 
+
+The data collectores have however also included an `Area` variable. This area variable splits the Lat/Long combination into 5 destinct areas. We assume that the data collectors have chosen these areas in a sensible way, and that this `Area` variable will be a better covariate in the model. 
+
+Hence we leave out `Lat` and `Long` from our models and instead use `Area`.
+
+
 
 # Exploratory data analysis
 
@@ -144,8 +152,6 @@ Thus we aggregate the data such that each observations corresponds to 1 minute. 
 * `VeDBA` numeric; average vector dynamic body acceleration
 * `StrokeRate` numeric; average stroke rate
 * `Los` factor; whether the whale was in the line of sight in the first observation
-* `Lat` numeric; average latitude
-* `Long` numeric; average longitude
 * `Sun` factor; whether the sun was up or down at this time point 
 * `Dive` logical; whether the whale was diving (diving starts at 10 meters)
 
@@ -175,8 +181,8 @@ that `ODBA` and `VeDBA` are correlated with correlation coefficient 0.997, and t
 `Call` and `Buzz` are in fact totally correlated with a correlation coefficient of 1. 
 
 ```{r}
-#cor(narwhal$ODBA, narwhal$VeDBA)
-#cor(narwhal$Call, narwhal$Buzz)
+cor(narwhal$ODBA, narwhal$VeDBA)
+cor(narwhal$Call, narwhal$Buzz)
 ```
 
 This leads us the remove `VeDBA` and `Buzz` from the dataset.

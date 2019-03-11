@@ -1,47 +1,139 @@
-slidesTemplate
+Narwhale data analysis - Group 11
 ========================================================
-author: 
-date: 
+author: Anders Christensen, Anna Damkjaer Laksafoss and Stefan Bruhn Rasmussen
+date: 14-03-2019
 autosize: true
 
-Slide 1
+Our Research Question
 ========================================================
 
-An easy way to make slides that contain R output is to use the .Rpres format. This uses RMarkdown and outputs an .html-file that can be opened using a browser. In the Presentation tab in RStudio you can choose View in Browser to preview your slide show (while you're working you can just preview your slides in RStudio by choosing Preview). Do this to ensure that everything looks good as the RStudio preview can differ from viewing the file in a browser. When you're done, you can (again in the Presentation tab) choose Save As Web Page to save an .html-file.
+Are the whales affected by the presence of the boat and / or the seismic activity ?
 
-For more details on the .Rpres format: <https://support.rstudio.com/hc/en-us/articles/200486468>.
 
-Some example code follows on the next slides.
-
-Bullet points
+Response variables
 ========================================================
 
-- Hyphens create bullets
-- Another bullet
-- A third bullet
+- Depth
+- Call
+- Click
+- Strokerate
+
+SHOULD WE HAVE DENSITY PLOTS HERE ??
 
 
-Code and output
+Phase variable
+========================================================
+We chose to only consider the 
+
+
+
+
+Other covariate variables
+========================================================
+- Area
+- Ind
+- Los
+- Sun
+- OBDA
+
+SHOULD WE HAVE DENSITY PLOTS HERE ??
+
+
+Removed data lines and variables 
+========================================================
+ABOUT LAT, LONG, Dist.to.Paamiut
+
+
+
+Our model class
+========================================================
+GAMMA (LINK = LOG)
+
+
+The Depth model
 ========================================================
 
-You can either hide or show both code and R output.
-
-```{r}
-set.seed(1)
-x <- rnorm(10)
-y <- rnorm(10)
-model <- lm(y ~ x)
-coef(model)
+```{r, eval = FALSE}
+glm(Depth ~ Phase + Area + Ind + Los + Sun + ODBA, 
+    data = narwhal, 
+    family = Gamma(link = "log"))
 ```
 
-Remember that your slides should be informative. For instance, code may be difficult to read on a slide and should therefore only be included if the code helps you make a point.
+The Depth model
+========================================================
+RESIDUAL PLOTS
 
 
-Plots
+The Depth model
+========================================================
+CONCLUSION
+
+
+
+
+
+The Click model
 ========================================================
 
-You can easily include plots as well.
-
-```{r, echo=FALSE}
-plot(x, y)
+```{r, eval = FALSE}
+glm(Click ~ Phase + Area + Ind + Los + Sun + ODBA, 
+    data = narwhal, 
+    family = Gamma(link = "log"))
 ```
+
+The Click model
+========================================================
+RESIDUAL PLOTS
+
+The Click model
+========================================================
+CONCLUSION
+
+
+
+The Call model
+========================================================
+
+```{r, eval = FALSE}
+glm(Call ~ Phase + Area + Ind + Los + Sun + ODBA, 
+    data = narwhal, 
+    family = Gamma(link = "log"))
+```
+
+The Call model
+========================================================
+RESIDUAL PLOTS
+
+
+The Call model
+========================================================
+CONCLUSION
+
+
+
+
+The Strokerate model
+========================================================
+
+```{r, eval = FALSE}
+glm(Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA, 
+    data = narwhal, 
+    family = Gamma(link = "log"))
+```
+
+
+The Strokerate model
+========================================================
+RESIDUAL PLOTS
+
+
+The Strokerate model
+========================================================
+CONCLUSION
+
+
+
+Conclusion
+========================================================
+BLA BLA BLA
+
