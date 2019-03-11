@@ -192,11 +192,12 @@ summary(narwhal[,c("Depth", "Strokerate", "CallSum", "ClickSum")])
 
 First of all we not that all these variables take values on the positive reals and hence when fitting we should only consider GLM's where the conditional distribution of our responses takes values on the positive reals. Examples of such distributions are the Poisson, Gamma, Binomial. Regarding the individual potential response variables we note that
 
-* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. When fitting, it would probably be a good idea to use a log link to control the skewness of `Depth`. 
+* `Depth` is very skewed with a mean much larger than the median and a max value much greater that both median, mean and 3rd. quantile. When fitting, it would probably be a good idea to use a transformation to control the skewness of `Depth`. Below we have plottet log of `Depth` and in this plot the is no heavy tails. 
 * `Strokerate` has a rather nice marginal distribution. There might be a small tail to the right. 
 * `ClickSum` is extreemly bi-modal. We create a binary version of this variable, where all values above 20 is set to 1 and all values below are set to 0. We call this new variable `ClickBi` and it should be model using the binomial family.
-* `CallSum` is very skewed. 
+* `CallSum` is very skewed. We found no obviuos transformation to do. 
 
+![](figs/logDepth.png){width=750px}
 
 
 
@@ -212,42 +213,42 @@ We note that
 * We have more observations on the whale "Helge" than on "Thor"
 * `Acou.qua` are almost always "G".
 
-Therefore the above plot does not force us to disregard any of the variables.
-
-However, a closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated. Indeed, from the table below we see that `Seismik` is completely determined by `Phase`.
+A closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated, even though this was not found in the section on "Strongly correlated variables". Indeed, from the table below we see that `Seismik` is completely determined by `Phase`.
 
 ```{r, echo=FALSE}
 x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
 kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
-
+Therefor we remove the variable `Seismik` from the data set. 
 
 
 ### The numeric explanatory variables
 Lastly we turn to the only numerical explanatory variable. 
 ```{r sum_num_explanatory}
-summary(narwhal[,c("Dist.to.shore","OBDA","VeDBA")])
+summary(narwhal[,c("Dist.to.shore","OBDA")])
 ```
 
 ![](figs/numerical_densities_exp.png){width=750px}
 
 
+We see that both `Dist.to.shore` and `ODBA` have tailes to the right. It could be interesting to examin if a transformation of these two variables would give a better fit below, but due to time constraints we leave them as they are. 
 
-```{r include = FALSE}
-### Conclusions and choices made from exploratory data analysis
-#* `ODBA` and `VeDBA` are strongly correlated and either can be chosen as a response.
-#* By looking at `Depth` we can partion the data into distinctive Dives.
-#* **SOMETHING WITH NAs in DIST TO PAARMIUT**
 
-### Choices made from exploratory data analysis
 
-#* Remove `Dist.to.Paamiut`
+## Phasesub
+
+We have chosen to work with the factor `Phasesub` in stead of `Phase`. `Phasesub` is a coarser factor then `Phase`, differentiating only between whether we are in an B, T or I Phase and not the phasenumber. It is created in the following way
+
+```{r, eval = FALSE}
+narwhal$Phasesub <- factor(narwhale$Phase, ordered = F) 
+levels(narwhale$Phasesub) <- list("B" = c("B"),
+                                  "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
+                                  "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
 ```
 
-## Aggregation of phases
+This choise is made, as `Phasesub` is better suited to answer our scientific question. We can the interpret the estimated effect of `Phasesub` equal to I as the effect of the boat, and the estimates effect of `Phasesub` equal to T as the effect of the boat and seismic activity together.  
 
-In the following data analysis, we will fit models to a factor consisting of the different phases as well as a aggregated factor of the phases, differentiating only between whether or not we are in a Test phase (i.e. if there is seismic activity from the airgun or not). 
 
 # Data Analysis and modeling
 

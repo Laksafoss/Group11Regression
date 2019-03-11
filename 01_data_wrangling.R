@@ -120,7 +120,7 @@ find_sub_data <- function(x) {
   X$ClickBi <- 0
   X$ClickBi[X$ClickSum>=20] <- 1
   return(X)
-}
+} 
 
 
 ## TIME OF DAY ANALYSIS ========================================================
