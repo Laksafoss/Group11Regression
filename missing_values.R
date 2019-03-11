@@ -14,8 +14,8 @@ png(filename = "figs/Missing_Values_Overview.png")
 gg_miss_upset(narwhal)
 dev.off()
 
-udenD <- within(narwhal, rm(Dist.to.Paamiut, Acou.qua, Area, Buzz, Call, Click, Date, Datetime, Hour, Depth, Diving, Los, Ind, Minut, ODBA, VeDBA, Seismik))
-png1(filename = "figs/Missing_values_phase.png")
+udenD <- within(narwhal, rm(Dist.to.Paamiut, Acou.qua, Area, Buzz, Call, Click, Date, Datetime, Hour, Depth, Diving, Los, Ind, Minut, ODBA, VeDBA, Seismik, Strokerate, Sun))
+png(filename = "figs/Missing_values_phase.png")
 gg_miss_var(udenD, facet = Phase)
 dev.off()
 
