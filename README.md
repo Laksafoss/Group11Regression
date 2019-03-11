@@ -10,25 +10,24 @@
 Only the Phase variable is of interest the rest is for adjustment
 
 ## THE ONLY VARIABLES OF INTEREST
-- [ ] Depth
-- [ ] Click
-- [ ] Call
-- [ ] Strokerate
-- [ ] Phase  -- > seismik is a subfactor
-- [ ] Area
-- [ ] Ind
-- [ ] Los
-- [ ] Sun
-- [ ] ODBA
-- [ ] Dive
-- [ ] Acou.qua
+- [X] Depth
+- [X] Click
+- [X] Call
+- [X] Strokerate
+- [X] Phase  -- > seismik is a subfactor
+- [X] Area
+- [X] Ind
+- [X] Los
+- [X] Sun
+- [X] ODBA
+- [X] Acou.qua
+- [X] Dist.to.shore
 
 ## VARIABLES TO BE THROWN AWAY !
-- [ ] VeDBA (strongly correlated with ODBA)
-- [ ] Buzz (strongly correlated with Call)
-- [ ] Lat & Long (we will use Area instead)
-- [ ] Dist.to.Paamiut (to difficult to clean up)
-- [ ] Dist.to.shore (too many NAs)
+- [X] VeDBA (strongly correlated with ODBA)
+- [X] Buzz (strongly correlated with Call)
+- [X] Lat & Long (we will use Area instead)
+- [X] Dist.to.Paamiut (to difficult to clean up)
 
 
 ## Directory layout
