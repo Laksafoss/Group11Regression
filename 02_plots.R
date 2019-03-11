@@ -5,27 +5,38 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 
-#narwhal <- readRDS(file = "outputs/narwhal_Minut.RDS")
-narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_Minut.RDS")
+#narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
-# histrogram/Density plots of exp numerical variables 
-numnames <- c("Dist.to.Paamiut","Dist.to.shore", "Lat", "Long")
+# histrogram/Density plots of explanatory numerical variables 
+numnames <- c("Dist.to.shore", "ODBA")
 numplotslist <- lapply(numnames,
                        function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
                          geom_histogram(bins = 50) +
                          geom_density())
-numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2, top = "Density plots of numerical variables")
+numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 1, top = "Density plots of numerical variables")
 ggsave(numplots, filename = "figs/numerical_densities_exp.png",device = "png")
 summary(narwhal$Dist.to.shore)
 
-# histrogram/Density plots of Resp numerical variables
-numnames <- c("Depth","ODBA", "VeDBA","Strokerate")
+# histogram/Density plots of Response variables
+numnames <- c("Depth", "Strokerate", "ClickSum", "CallSum")
 numplotslist <- lapply(numnames,
                    function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
                      geom_histogram(bins = 50) +
                      geom_density())
 numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2,top = "Density plots of numerical variables")
 ggsave(numplots, filename = "figs/numerical_densities_resp.png",device = "png")
+
+# histogram/Density plots of Click/Call max variables
+narwhal$logDepth <- log(narwhal$Depth)
+numnames <- c("logDepth" )
+numplotslist <- lapply(numnames,
+                       function(name) ggplot(narwhal, aes_string(x = name, y="..density..")) +
+                         geom_histogram(bins = 50) +
+                         geom_density())
+numplots <- marrangeGrob(numplotslist,  ncol = 1, nrow = 1,top = "log of Depth")
+ggsave(numplots, filename = "figs/logDepth.png", device = "png")
+
 
 # Depth/Timeplot
 
@@ -167,22 +178,19 @@ ggsave(locationplotPhaseNoBNoHelge, filename = "figs/locationplotPhasenoBNH.png"
 ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", device = "png")
 
 
-# Correlation matrix for numerical variables
-narwhalnum <- narwhal[, c("ODBA", "VeDBA", "Strokerate")]
-
+#### Correlation matrices for numerical and categorical variables
+#Setup numerical
+narwhalnum <- narwhal[, c("ODBA", "VeDBA", "Strokerate", "Dist.to.shore", "Depth")]
 cormat1 <- cor(data.matrix(na.omit(narwhalnum)), method = "pearson")
 
-png("figs/correlationmatrixnum.png")
-catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45, number.digits = 3, addCoef.col = "white")
-dev.off()
-catcorrmatplot1
-?cor
-?corrplot.mixed
-# Correlation matrix for categorical variables
-narwhalcat <- narwhal[, c("Ind", "Area", "Click", "Buzz", "Acou.qua", "Seismik", "Phase", "Los")]
-cormat1 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
+#Setup categorical
+narwhalcat <- narwhal[, c("Ind", "Area", "ClickSum", "CallSum","BuzzSum", "Acou.qua", "Seismik", "Phase", "Los")]
+cormat2 <- cor(data.matrix(na.omit(narwhalcat)), method = "spearman")
 
-png("figs/correlationmatrix.png")
-catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45)
+#Plot matrices
+png("figs/correlationmatrix.png", width = 1480, height = 1080, units = "px", pointsize = 20)
+par(mfrow=c(1,2))
+catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45, number.digits = 3, addCoef.col = "white")
+catcorrmatplot2 <- corrplot(cormat2, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45, number.digits = 3, addCoef.col = "white")
+par(mfrow=c(1,1))
 dev.off()
-?corrplot
