@@ -5,7 +5,8 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 
-narwhal <- readRDS(file = "outputs/narwhal_Minut.RDS")
+#narwhal <- readRDS(file = "outputs/narwhal_Minut.RDS")
+narwhal <- readRDS(file = "outputs/narwhal_modified.RDS")
 
 # histrogram/Density plots of exp numerical variables 
 numnames <- c("Dist.to.Paamiut","Dist.to.shore", "Lat", "Long")
@@ -15,7 +16,7 @@ numplotslist <- lapply(numnames,
                          geom_density())
 numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2, top = "Density plots of numerical variables")
 ggsave(numplots, filename = "figs/numerical_densities_exp.png",device = "png")
-
+summary(narwhal$Dist.to.shore)
 
 # histrogram/Density plots of Resp numerical variables
 numnames <- c("Depth","ODBA", "VeDBA","Strokerate")
