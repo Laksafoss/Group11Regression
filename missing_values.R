@@ -14,7 +14,7 @@ png(filename = "figs/Missing_Values_Overview.png")
 gg_miss_upset(narwhal)
 dev.off()
 
-udenD <- within(narwhal, rm(Dist.to.Paamiut))
+udenD <- within(narwhal, rm(Dist.to.Paamiut, Acou.qua, Area, Buzz, Call, Click, Date, Datetime, Hour, Depth, Diving, Los, Ind, Minut, ODBA, VeDBA, Seismik, Strokerate, Sun))
 png(filename = "figs/Missing_values_phase.png")
 gg_miss_var(udenD, facet = Phase)
 dev.off()
@@ -32,6 +32,7 @@ pctT<-round((H-G)/H*100,2)
 
 #Table for above percentages
 a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
+a<- t(a)
 png(filename = "figs/PercentageTable.png")
 grid.table(a) 
 dev.off()
