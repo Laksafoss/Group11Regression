@@ -33,7 +33,7 @@ pctT<-round((H-G)/H*100,2)
 #Table for above percentages
 a<-do.call(rbind, Map(data.frame, Helge = pctH, Thor = pctT))
 a<- t(a)
-png(filename = "figs/PercentageTable.png")
+png(filename = "figs/PercentageTable.png", width = 600, height = 140, units = "px")
 grid.table(a) 
 dev.off()
 
