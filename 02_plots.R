@@ -15,7 +15,8 @@ numplotslist <- lapply(numnames,
                          geom_histogram(bins = 50) +
                          geom_density())
 numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 1, top = "Density plots of numerical variables")
-ggsave(numplots, filename = "figs/numerical_densities_exp.png",device = "png")
+ggsave(numplots, filename = "figs/numerical_densities_exp.png",device = "png", dpi = 300,
+       width = 6, height = 4, units = "in")
 summary(narwhal$Dist.to.shore)
 
 # histogram/Density plots of Response variables
@@ -25,7 +26,8 @@ numplotslist <- lapply(numnames,
                      geom_histogram(bins = 50) +
                      geom_density())
 numplots <- marrangeGrob(numplotslist,  ncol = 2, nrow = 2,top = "Density plots of numerical variables")
-ggsave(numplots, filename = "figs/numerical_densities_resp.png",device = "png")
+ggsave(numplots, filename = "figs/numerical_densities_resp.png", device = "png" ,dpi = 300,
+       width = 6, height = 4, units = "in")
 
 # histogram/Density plots of Click/Call max variables
 narwhal$logDepth <- log(narwhal$Depth)
@@ -35,7 +37,8 @@ numplotslist <- lapply(numnames,
                          geom_histogram(bins = 50) +
                          geom_density())
 numplots <- marrangeGrob(numplotslist,  ncol = 1, nrow = 1,top = "log of Depth")
-ggsave(numplots, filename = "figs/logDepth.png", device = "png")
+ggsave(numplots, filename = "figs/logDepth.png", device = "png",dpi = 300,
+       width = 6, height = 3, units = "in")
 
 
 # Depth/Timeplot
@@ -44,7 +47,8 @@ depthtimeplot <- ggplot(narwhal, aes(x = Start)) +
   geom_line(aes(y = -Depth)) +
   facet_wrap(c("Ind", "Phase"), labeller = "label_both", scales = "free_x") +
   ggtitle("Depth over time by phase and Ind") + ylab("Depth")
-ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png")
+ggsave(depthtimeplot, filename = "figs/depthtimeplot.png", device = "png",dpi = 300,
+       width = 6, height = 4, units = "in")
 
 times <- narwhal %>%
   group_by(Phase, Ind) %>%
@@ -61,7 +65,8 @@ depthtimeplotPhases <- ggplot(narwhal) +
   facet_wrap(c("Ind"), labeller = "label_both", nrow = 2) +
   ggtitle("Depth over time by Ind, shaded by Phase") + ylab("Depth")
 
-ggsave(depthtimeplotPhases, filename = "figs/depthtimeplotPhases.png", device = "png")
+ggsave(depthtimeplotPhases, filename = "figs/depthtimeplotPhases.png", device = "png", dpi = 300,
+       width = 6, height = 4, units = "in")
 
 depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
   geom_rect(
@@ -74,7 +79,8 @@ depthtimeplotPhasesNoB <- ggplot(narwhal[narwhal$Phase != "B",]) +
   ggtitle("Depth over time by Ind, shaded by Phase without the B-Phase")+ ylab("Depth")
 depthtimeplotPhasesNoB
 
-ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
+ggsave(depthtimeplotPhasesNoB, filename = "figs/depthtimeplotPhasesNoB.png", device = "png", dpi = 300,
+       width = 6, height = 2, units = "in")
 
 depthtimeplotPhasesNoBHelge <- ggplot(narwhal[narwhal$Ind == "Helge" & narwhal$Phase != "B",]) +
   geom_rect(
@@ -85,7 +91,8 @@ depthtimeplotPhasesNoBHelge <- ggplot(narwhal[narwhal$Ind == "Helge" & narwhal$P
   geom_line(aes(x = Start, y = -Depth), size = 0.3) +
   ggtitle("Helges Depth over time after B-Phase, shaded by Phase") + ylab("Depth")
 
-ggsave(depthtimeplotPhasesNoBHelge, filename = "figs/depthtimeplotPhasesNoB.png", device = "png")
+ggsave(depthtimeplotPhasesNoBHelge, filename = "figs/depthtimeplotPhasesNoB.png", device = "png", dpi = 300,
+       width = 6, height = 3, units = "in")
 
 # Phase and time plots
 
@@ -121,9 +128,12 @@ locationplotPhase <- ggplot(narwhal,
 
 locationsplots <- arrangeGrob(locationplot, locationplotPhase, nrow = 2, top = "Location plots by Time and by Phase")
 
-ggsave(locationplot, filename = "figs/locationplot.png", device = "png")
-ggsave(locationplotPhase, filename = "figs/locationplotPhase.png", device = "png")
-ggsave(locationsplots, filename = "figs/locationsplots.png", device = "png")
+ggsave(locationplot, filename = "figs/locationplot.png", device = "png",dpi = 300,
+       width = 6, height = 4, units = "in")
+ggsave(locationplotPhase, filename = "figs/locationplotPhase.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
+ggsave(locationsplots, filename = "figs/locationsplots.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
 
 # Location plot no b
 startstopNoB <- narwhal %>% group_by(Ind) %>% 
@@ -146,7 +156,8 @@ locationplotNoB <- ggplot(narwhal[narwhal$Phase != "B",],
 locationplotNoB
 
 locationsplots <- arrangeGrob(locationplot, locationplotNoB, nrow = 2, top = "Location plots by Start with and without Phase B")
-ggsave(locationsplots, filename = "figs/locationsplotswNoB.png", device = "png")
+ggsave(locationsplots, filename = "figs/locationsplotswNoB.png", device = "png",  dpi = 300,
+       width = 6, height = 2, units = "in")
 
 
 # Location plot no b
@@ -172,10 +183,14 @@ locationplotPhaseNoBNoHelge <- ggplot(narwhal[narwhal$Phase != "B" & narwhal$Ind
   geom_point(data = startstopNoB, aes(shape = StartStop), size = 2) +
   ggtitle("Location Plot")
 locationsplotsNoBoHelge <- arrangeGrob(locationplotNoBNoHelge, locationplotPhaseNoBNoHelge, ncol = 2, top = "Location plots by Time and by Phase")
-ggsave(locationplotNoB, filename = "figs/locationplotnoB.png", device = "png")
-ggsave(locationplotNoBNoHelge, filename = "figs/locationplotnoBNH.png", device = "png")
-ggsave(locationplotPhaseNoBNoHelge, filename = "figs/locationplotPhasenoBNH.png", device = "png")
-ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", device = "png")
+ggsave(locationplotNoB, filename = "figs/locationplotnoB.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
+ggsave(locationplotNoBNoHelge, filename = "figs/locationplotnoBNH.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
+ggsave(locationplotPhaseNoBNoHelge, filename = "figs/locationplotPhasenoBNH.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
+ggsave(locationsplotsNoBoHelge, filename = "figs/locationsplotsNoBNH.png", device = "png" ,dpi = 300,
+       width = 6, height = 2, units = "in")
 
 
 #### Correlation matrices for numerical and categorical variables
@@ -210,5 +225,5 @@ periodicplot <- ggplot(tmpDF, aes(y = periodic_value, Time)) +
   ggtitle("Periodic daytime value for a single day") +
   theme(axis.text=element_text(size=5),axis.title=element_text(size=8))
 
-ggsave(periodicplot, filename = "figs/periodicplot.png", device = "png", dpi = 300 ,
+ggsave(periodicplot, filename = "figs/periodicplot.png", device = "png", dpi = 300,
        width = 6, height = 2, units = "in")

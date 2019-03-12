@@ -84,7 +84,8 @@ splineeffect <- function(fit) {
 fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore, 
                  data = DATA, family = Gamma(link = "log"))
 
-png("figs/GammaLogDepth.png")
+png("figs/GammaLogDepth.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.depth, 3,3)
 dev.off()
 
@@ -109,7 +110,8 @@ residualplotter(fit.depth.dummy, 2,2)
 fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
                    ODBA + Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
 
-png("figs/ClickBiBin.png")
+png("figs/ClickBiBin.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.click, 3,3)
 dev.off()
 
@@ -118,11 +120,13 @@ fit.click.sp <- glm(ClickBi ~ -1 + Phasesub + Area + Ind + Los + DaytimePeriodic
                    ns(ODBA, df=4) + Dist.to.shore + Acou.qua, 
                  data = DATA, family = "binomial")
 
-png("figs/ClickBiBinSP.png")
+png("figs/ClickBiBinSP.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.click.sp, 3,3)
 dev.off()
 
-png("figs/ClickBiBinSPeffect.png")
+png("figs/ClickBiBinSPeffect.png", res = 300,
+    width = 6, height = 4, units = "in")
 splineeffect(fit.click.sp)
 dev.off()
 
@@ -147,7 +151,8 @@ fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA +
                   Dist.to.shore + Acou.qua, 
                 data = DATA, family = "poisson")
 
-png("figs/CallSumPoisson.png")
+png("figs/CallSumPoisson.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.call, 3,3)
 dev.off()
 
@@ -173,7 +178,8 @@ fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic
                         ODBA + Dist.to.shore, 
                       data = DATA, family = "poisson")
 
-png("figs/PoissonStrokerate.png")
+png("figs/PoissonStrokerate.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.strokerate, 3,3)
 dev.off()
 
@@ -183,11 +189,13 @@ fit.strokerate.sp <- glm(Strokerate ~ -1 + Phasesub + Area + Ind + Los + Daytime
                         ns(ODBA, df=4)+ Dist.to.shore, 
                       data = DATA, family = "poisson")
 
-png("figs/PoissonStrokerateSP.png")
+png("figs/PoissonStrokerateSP.png", res = 300,
+    width = 6, height = 4, units = "in")
 residualplotter(fit.strokerate.sp, 3,3)
 dev.off()
 
-png("figs/PoissonStrokerateSPeffect.png")
+png("figs/PoissonStrokerateSPeffect.png", res = 300,
+    width = 6, height = 4, units = "in")
 splineeffect(fit.strokerate.sp)
 dev.off()
 
