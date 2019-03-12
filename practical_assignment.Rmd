@@ -108,6 +108,10 @@ Not surprisisingly, the Lat and Long variables are missing simultaneously, indic
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` variable encoding whether or not the sun was up or down at the time. <br>
 
+### Time of day as periodic value
+
+To be able to include the (potential) effect of the time of day even more precise than the `Sun` factor called `DaytimePeriodic`. This numerical variable encodes the time of day in a periodic manner. It is encoded such that the largest positive value corresponds to 15:00 and the (numerically) largest negative value corresponds to 03:00.
+
 ### Longitude, Latitude and area
 
 We plot Long/lat against each other and color it by Datetime, to see if there are som oddities.
