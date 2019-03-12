@@ -62,7 +62,8 @@ dev.off()
 # negative.binomial(theta) for theta = 2,5,7 giver ikke noget fornuftigt
 
 # dummy model for testing ideas
-fit.depth.dummy <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ns(Start, df = 7) + ODBA+ Dist.to.shore, 
+fit.depth.dummy <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + 
+                         ns(Start, df = 7) + ODBA+ Dist.to.shore, 
                        data = DATA, family = negative.binomial(7))
 residualplotter(fit.depth.dummy, 2,2)
 
@@ -80,12 +81,16 @@ png("figs/ClickBiBin.png")
 residualplotter(fit.click, 3,3)
 dev.off()
 
+# ns(Dist.to.shore, df = 3) forbedrer ikke smootheren i residual plottet
+# ns(ODBA, df = n) ser lovende ud, har kigget på n=2,3,4. 
+# fjern Sun tilføj ns(Start, df = n) forbedrer ikke smootheren for n = 6,7
 
 
 # dummy model for testing ideas
-fit.click.dummy <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + 
-                   Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
-residualplotter(fit.click.dummy, 2, 2)
+fit.click.dummy <- glm(ClickBi ~ Phasesub + Area + Ind + Los + ns(Start, df = 6) + ODBA + 
+                   Dist.to.shore + Acou.qua, 
+                   data = DATA, family = "binomial")
+residualplotter(fit.click.dummy, 3, 3)
 
 # ----------------------------------------------------------------</click model>
 
