@@ -322,7 +322,7 @@ fit.click.sp <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic +
 
 ![](figs/ClickBiBinSP.png)
 
-We see that adding splines on `ODBA` leads to a better fit. It is not immediately clear which plot belongs to the observed data. Even though the middle plot belongs to the observed data, one could suspect that it would be the middle left plot.
+We see that adding splines on `ODBA` leads to a better fit. It is not immediately clear which plot belongs to the observed data. Even though the bottom middle plot belongs to the observed data, one could suspect that it would be the middle left plot.
 
 We accept this model. In order to understand the effect of `Phasesub` we plot predictions of `ClickBi` as a function of `ODBA`, and we distinguish between each type of phase and each whale. Plotting the prediction with a 95\% pointwise Wald confidence interval yields:
 
