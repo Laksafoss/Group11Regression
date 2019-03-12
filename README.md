@@ -2,10 +2,10 @@
 
 ## MODELS FOR FITTING
 
-- [ ]      Depth ~ Phase + Area + Ind + Los + Sun + ODBA
-- [ ]      Click ~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua
-- [ ]       Call ~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua
-- [ ] Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA
+- [X]      Depth ~ Phase + Area + Ind + Los + Sun + ODBA
+- [X]      Click ~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua
+- [X]       Call ~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua
+- [X] Strokerate ~ Phase + Area + Ind + Los + Sun + ODBA
 
 Only the Phase variable is of interest the rest is for adjustment
 
