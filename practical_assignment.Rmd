@@ -103,7 +103,6 @@ In order to check when missing values appear for other variables, we plot the nu
 
 Not surprisisingly, the Lat and Long variables are missing simultaneously, indicating a GPS error. There is no tendency for `Dist.to.shore`. 
 
-
 ### Sun as factor
 
 As a small novelty we have looked up the sunrise and sundown times august 16th 2017 latitude 70, longitude -27. The sun would have risen at 02:49 and went down at 20:50. From this data we have encoded a `Sun` variable encoding whether or not the sun was up or down at the time. <br>
@@ -122,7 +121,16 @@ The data collectores have however also included an `Area` variable. This area va
 
 Hence we leave out `Lat` and `Long` from our models and instead use `Area`.
 
+### Seismik determined by phase
 
+A closer inspection of the variables `Seismik` and `Phase` yields that they  are extremely correlated, even though this was not found in the section on "Strongly correlated variables". Indeed, from the table below we see that `Seismik` is completely determined by `Phase`.
+
+```{r, echo=FALSE}
+x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
+kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Therefore we remove the variable `Seismik` from the data set. 
 
 # Exploratory data analysis
 
@@ -144,7 +152,6 @@ Thus we aggregate the data such that each observations corresponds to 1 minute. 
 * `Ind`; factor;  whale name
 * `Start` date time; first time point in the group
 * `Depth` numeric; average depth
-* `Seismik` numeric; average number of seismic activity pr second
 * `Phase` factor; phase of the first observation
 * `Area` factor; area of the first observation
 * `Acou.qua` numeric; the average acoustic quality
@@ -206,22 +213,14 @@ First of all we not that all these variables take values on the positive reals a
 We now consider the categorical explanatory variables. 
 
 ```{r sum_cat_explanatory}
-summary(narwhal[,c("Seismik", "Phase", "Area", "Acou.qua", "Ind", "Los")])
+summary(narwhal[,c("Phase", "Area", "Acou.qua", "Ind", "Los")])
 ```
 
-We note that
+From the summary, there is no reason to be suspicious of any large errors, but we note that
 
 * We have more observations on the whale "Helge" than on "Thor"
+* A lot of the data points belong to phase "B"
 * `Acou.qua` are almost always "G".
-
-A closer inspection yields that the variables `Seismik` and `Phase` are indeed very correlated, even though this was not found in the section on "Strongly correlated variables". Indeed, from the table below we see that `Seismik` is completely determined by `Phase`.
-
-```{r, echo=FALSE}
-x <- sapply(levels(narwhal$Phase), function(x) summary(narwhal$Seismik[narwhal$Phase == x]))
-kable(data.frame(x)) %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
-```
-
-Therefor we remove the variable `Seismik` from the data set. 
 
 
 ### The numeric explanatory variables
