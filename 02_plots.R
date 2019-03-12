@@ -194,3 +194,21 @@ catcorrmatplot1 <- corrplot(cormat1, type = "upper", order = "hclust", tl.col = 
 catcorrmatplot2 <- corrplot(cormat2, type = "upper", order = "hclust", tl.col = "black", tl.srt = 45, number.digits = 3, addCoef.col = "white")
 par(mfrow=c(1,1))
 dev.off()
+
+# Peridiocty plot
+SECS_IN_DAY <- 60*60*24
+scaler <- function(x) x/SECS_IN_DAY * pi * 2
+toPeriodic <- function(x) cos(scaler(x)) + sin(scaler(x))
+secs <- seq(0,SECS_IN_DAY,by = 60)
+tmpDF <- data.frame(periodic_value = toPeriodic(secs),
+                    Time = secs)
+periodicplot <- ggplot(tmpDF, aes(y = periodic_value, Time)) +
+  geom_line() +
+  scale_x_time(breaks = seq(0,24, by = 3) * 60 * 60) +
+  labs(x = "Time of Day",
+       y = "Periodic value") +
+  ggtitle("Periodic daytime value for a single day") +
+  theme(axis.text=element_text(size=5),axis.title=element_text(size=8))
+
+ggsave(periodicplot, filename = "figs/periodicplot.png", device = "png", dpi = 300 ,
+       width = 6, height = 2, units = "in")
