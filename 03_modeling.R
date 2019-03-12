@@ -46,6 +46,7 @@ residualplotter <- function(fit, n, m) {
 }
 
 
+
 # Depth model ==================================================================
 
 # First model
@@ -55,6 +56,9 @@ fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore
 png("figs/GammaLogDepth.png")
 residualplotter(fit.depth, 3,3)
 dev.off()
+
+# ns(ODBA, df = 3) giver ikke noget fornuftigt
+# erstatte Sun med ns(Start, df = 6) giver ikke noget fornuftigt
 
 
 # Click model ==================================================================
