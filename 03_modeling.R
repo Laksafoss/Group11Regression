@@ -2,15 +2,17 @@
 library(glmnet)
 library(ggplot2)
 library(gridExtra)
+library(splines)
+library(MASS)
 
 #DATA <- readRDS("outputs/narwhal.RDS")
 DATA <- readRDS("outputs/narwhal_Minut.RDS")
 #DATA <- readRDS("outputs/narwhal_TenMinut.RDS")
 #DATA <- readRDS("outputs/narwhal_Diving.RDS")
 
-DATA <- DATA[,c("Ind", "Start", "Depth", "Seismik", "Phase", "Area", "Acou.qua", "Dist.to.shore", "CallSum", "CallMean",
-                "CallMax","ClickBi", "ClickSum", "ClickMean", "ClickMax", "BuzzSum", "BuzzMean", "BuzzMax", 
-                "ODBA", "Strokerate", "Los", "Sun")]
+DATA <- DATA[,c("Ind", "Start", "Depth", "Seismik", "Phase", "Area", "Acou.qua", 
+                "Dist.to.shore", "CallSum", "ClickBi", "ODBA", "Strokerate", 
+                "Los", "Sun")]
 DATA <- DATA[complete.cases(DATA),]
 
 
@@ -19,6 +21,7 @@ DATA$Phasesub <- DATA$Phase <- factor(DATA$Phase, ordered = F)
 levels(DATA$Phasesub) <- list("B" = c("B"),
                               "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
                               "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
+
 
 ## create the desired model matrices
 #x <- model.matrix(~ Phase + Area + Ind + Los + Sun + ODBA + Dive + Acou.qua,
