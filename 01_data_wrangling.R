@@ -1,6 +1,5 @@
 library(lubridate) # for date and times
 library(dplyr) # general purpose data manipulation
-library(ggplot2)
 
 
 # ==  STEP 1  :  CLEAN UP RAW DATA A BIT  ======================================
@@ -84,8 +83,8 @@ narwhal <- narwhal %>% filter(!is.na(Strokerate))
 SECS_IN_DAY <- 60*60*24
 scaler <- function(x) x/SECS_IN_DAY * pi * 2
 toPeriodic <- function(x) cos(scaler(x)) + sin(scaler(x))
-narwhal$TimeOFDayPeriodic <- as.integer(narwhal$Datetime) %% SECS_IN_DAY 
-narwhal$TimeOFDayPeriodic <- toPeriodic(narwhal$TimeOFDayPeriodic) * -1
+narwhal$DaytimePeriodic <- as.integer(narwhal$Datetime) %% SECS_IN_DAY 
+narwhal$DaytimePeriodic <- toPeriodic(narwhal$DaytimePeriodic) * -1
 
 # Save
 narwhal <- narwhal %>% ungroup()
@@ -119,7 +118,8 @@ find_sub_data <- function(x) {
               BuzzMean = mean(as.numeric(Buzz) - 1, na.rm = T),
               CallMax = max(as.numeric(Call) - 1, na.rm = T),
               ClickMax = max(as.numeric(Click) - 1, na.rm = T),
-              BuzzMax = max(as.numeric(Buzz) - 1, na.rm = T)
+              BuzzMax = max(as.numeric(Buzz) - 1, na.rm = T),
+              DaytimePeriodic = mean(DaytimePeriodic)
               
     )
   X <- X[ ,-1]
@@ -159,3 +159,4 @@ saveRDS(TenMinData, file = "outputs/narwhal_TenMinut.RDS")
 saveRDS(MinData, file = "outputs/narwhal_Minut.RDS")
 # Save reduced data set (selected such that both whales are present
 #saveRDS(narwhal[(369254-10000):(369254+10000),], file = "outputs/narwhal_modified_reduced.RDS")
+
