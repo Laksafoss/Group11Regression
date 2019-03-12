@@ -208,7 +208,7 @@ periodicplot <- ggplot(tmpDF, aes(y = periodic_value, Time)) +
   labs(x = "Time of Day",
        y = "Periodic value") +
   ggtitle("Periodic daytime value for a single day") +
-  theme(axis.text=element_text(size=5),axis.title=element_text(size=10))
+  theme(axis.text=element_text(size=5),axis.title=element_text(size=8))
 
 ggsave(periodicplot, filename = "figs/periodicplot.png", device = "png", dpi = 300 ,
        width = 6, height = 2, units = "in")
