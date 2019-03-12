@@ -1,5 +1,5 @@
 
-library(glmnet)
+#library(glmnet)
 library(ggplot2)
 library(gridExtra)
 library(splines)
@@ -9,10 +9,11 @@ library(MASS)
 DATA <- readRDS("outputs/narwhal_Minut.RDS")
 #DATA <- readRDS("outputs/narwhal_TenMinut.RDS")
 #DATA <- readRDS("outputs/narwhal_Diving.RDS")
+summary(DATA)
 
 DATA <- DATA[,c("Ind", "Start", "Depth", "Seismik", "Phase", "Area", "Acou.qua", 
                 "Dist.to.shore", "CallSum", "ClickBi", "ODBA", "Strokerate", 
-                "Los", "Sun")]
+                "Los", "Sun", "DaytimePeriodic")]
 DATA <- DATA[complete.cases(DATA),]
 
 
@@ -51,25 +52,51 @@ residualplotter <- function(fit, n, m) {
 }
 
 
+splineeffect <- function(fit) {
+  invLink <- fit$family$linkinv
+  predFrame <- expand.grid(
+    Phasesub = c("B", "I", "T"),
+    Area = c("IG"),
+    Ind = c("Helge", "Thor"),
+    Los = c(1),
+    DaytimePeriodic = c(1.4),
+    ODBA = seq(0.011, 0.78, length.out = 250),
+    Dist.to.shore = median(DATA$Dist.to.shore))
+  
+  if ("Acou.qua" %in% names(fit$coefficients)) {
+    predFrame <- cbind(predFrame, "Acou.qua" = 1)
+  }
+                          
+  pred <- predict(fit, newdata = predFrame, se.fit = TRUE)
+  predFrame <- cbind(predFrame, pred)
+  
+  qplot(ODBA, invLink(fit), data = predFrame, geom = "line", color = Phasesub) +
+    geom_ribbon(aes(ymin = invLink(fit - 2 * se.fit), 
+                    ymax = invLink(fit + 2 * se.fit), 
+                    fill = Phasesub), alpha = 0.3) +
+    facet_wrap(~Ind) +  
+    ylab(names(fit$model)[1])
+}
 
 # Depth model ==================================================================
 
 # First model
-fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore, 
+fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore, 
                  data = DATA, family = Gamma(link = "log"))
 
 png("figs/GammaLogDepth.png")
 residualplotter(fit.depth, 3,3)
 dev.off()
 
-# ns(ODBA, df = 3) giver ikke noget fornuftigt
-# erstatte Sun med ns(Start, df = 7) giver ikke noget fornuftigt
-# negative.binomial(theta) for theta = 2,5,7 giver ikke noget fornuftigt
+# ns(ODBA, df = n) n=1 giver ikke noget fornuftigt, n=2 måske en ide, n=3,4,... fejler
+# ns(Dist.to.shore, df =n) for n=1,2,3,4 giver ikke noget fornuftingt
+# ns(DaytimePeriodic, df = n) for n=1,2,3,4 giver ikke noget fornuftigt
+# negative.binomial(theta) for theta = 2,3,4 giver ikke noget fornuftigt
 
 # dummy model for testing ideas
-fit.depth.dummy <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + 
-                         ns(Start, df = 7) + ODBA+ Dist.to.shore, 
-                       data = DATA, family = negative.binomial(7))
+fit.depth.dummy <- glm(Depth ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                         ODBA + Dist.to.shore, 
+                       data = DATA, family = negative.binomial(2))
 residualplotter(fit.depth.dummy, 2,2)
 
 # ----------------------------------------------------------------</depth model>
@@ -79,48 +106,60 @@ residualplotter(fit.depth.dummy, 2,2)
 # Click model ==================================================================
 
 # First model
-fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + 
-                   Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
+fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                   ODBA + Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
 
 png("figs/ClickBiBin.png")
 residualplotter(fit.click, 3,3)
 dev.off()
 
-# ns(Dist.to.shore, df = 3) forbedrer ikke smootheren i residual plottet
-# ns(ODBA, df = n) ser lovende ud, har kigget på n=2,3,4. 
-# fjern Sun tilføj ns(Start, df = n) forbedrer ikke smootheren for n = 6,7
+# Second model - spline on ODBA
+fit.click.sp <- glm(ClickBi ~ -1 + Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                   ns(ODBA, df=5) + Dist.to.shore + Acou.qua, 
+                 data = DATA, family = "binomial")
+
+png("figs/ClickBiBinSP.png")
+residualplotter(fit.click.sp, 3,3)
+dev.off()
+
+png("figs/ClickBiBinSPeffect.png")
+splineeffect(fit.click.sp)
+dev.off()
+
+# ns(ODBA, df = n) n=2,3,4,5 forbedrer
+# ns(Dist.to.shore, df =n) for n=2,3,4,5 forbedere ikke
+# ns(DaytimePeriodic, df=n) for n=2,3,4 forbedrer ikke
 
 
 # dummy model for testing ideas
-fit.click.dummy <- glm(ClickBi ~ Phasesub + Area + Ind + Los + ns(Start, df = 6) + ODBA + 
-                   Dist.to.shore + Acou.qua, 
+fit.click.dummy <- glm(ClickBi ~ Phasesub + Area + Ind + Los + ns(DaytimePeriodic, df=4) + 
+                         ODBA + Dist.to.shore + Acou.qua, 
                    data = DATA, family = "binomial")
 residualplotter(fit.click.dummy, 3, 3)
 
 # ----------------------------------------------------------------</click model>
 
 
-
 # Call model ===================================================================
 
 # First model
-fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, 
+fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA +
+                  Dist.to.shore + Acou.qua, 
                 data = DATA, family = "poisson")
 
 png("figs/CallSumPoisson.png")
 residualplotter(fit.call, 3,3)
 dev.off()
 
-# ns(ODBA, df = n) forbedrer ikke for n = 1,2,3,4
-# ns(Dist.to.shore, df = n) forbedrer ikke for n = 1,2,3,4
-# fjern Sun tilføj ns(Start, df = n) forbedrer ikke for n = 6, 7
-
-
+# ns(ODBA, df=n) for n=2,3,4,5 forbedrer ikke 
+# ns(Dist.to.shore, df=n) for n=2,3,4,5 forbedrer måske for højere df ??
+# ns(DaytimePeriodic, df=n) for n=2,3,4,5 forbedrer ikke
+# negative.binomial(theta) for theta=2,3,5 forbedrer ikke
 
 # dummy model for testing ideas
-fit.call.dummy <- glm(CallSum ~ Phasesub + Area + Ind + Los + ns(Start, df = 7) + 
+fit.call.dummy <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
                         ODBA + Dist.to.shore + Acou.qua, 
-                data = DATA, family = "poisson")
+                data = DATA, family = negative.binomial(2))
 residualplotter(fit.call.dummy, 2, 2)
 
 # -----------------------------------------------------------------</call model>
@@ -130,22 +169,39 @@ residualplotter(fit.call.dummy, 2, 2)
 # Strokerate model =============================================================
 
 # First model
-fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, 
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                        ODBA + Dist.to.shore, 
                       data = DATA, family = "poisson")
 
 png("figs/PoissonStrokerate.png")
 residualplotter(fit.strokerate, 3,3)
 dev.off()
 
-# ns(ODBA, df = n) n=1 forbedrer intet, n=2,3,4 virker bedere
-# ns(Dist.to.shore, df = n) forbedrer intet for n=1,2,3,4
-# fjern sun tilføj ns(Start, df = n) for n=6,7 forbedrer intet
+
+# Second model - spline on ODBA
+fit.strokerate.sp <- glm(Strokerate ~ -1 + Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                        ns(ODBA, df=5)+ Dist.to.shore, 
+                      data = DATA, family = "poisson")
+
+png("figs/PoissonStrokerateSP.png")
+residualplotter(fit.strokerate.sp, 3,3)
+dev.off()
+
+png("figs/PoissonStrokerateSPeffect.png")
+splineeffect(fit.click.sp)
+dev.off()
+
+# ns(ODBA, df=n) for n=3,4,5 virker ret godt !
+# ns(Dist.to.shore, df=n) for n=2,3,4,5 ingen forbedring
+# ns(DaytimePeriodic, df=n)  for n=2,3,4,5 ingen forbedring
+# negative.binomial(theta) for theta=2,3,5
+# Gamma(link = "log") forbedrer ikke - nogenlunde samme konklusioner
 
 
 # dummy model for testing ideas
-fit.strokerate.dummy <- glm(Strokerate ~ Phasesub + Area + Ind + Los + ns(Start, df=7) + 
+fit.strokerate.dummy <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
                             ODBA + Dist.to.shore, 
-                      data = DATA, family = "poisson")
+                      data = DATA, family = negative.binomial(2))
 residualplotter(fit.strokerate.dummy, 2,2)
 
 # -----------------------------------------------------------</strokerate model>
