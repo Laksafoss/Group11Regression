@@ -272,9 +272,9 @@ To answer our scientific question we are in fact only really interested in the e
 
 We will however never allow one of the respons variables to be an explanatory variable in another model. 
 
+We suspect that we may need nonlinear expansions on the numerical variables (`ODBA`, `Dist.to.shore` and `DatetimePeriodic`). If this is the case, we will choose to put the knots of the splines in the 0.25, 0.5 and 0.75 quantiles.
+
 To judge goodness of fit we will look at residual plots. We will plot the observed residual plot among 8 residual plots based on data simulated under the model. If the is sufficient goodness of fit we will report the estimated effect of the B, T and I phases. 
-
-
 
 
 
@@ -292,10 +292,8 @@ In the below plot we have the residual plot of the observed data along with 8 re
 
 ![](figs/GammaLogDepth.png)
 
-
-
-
-
+Clearly the observed data doesn't follow the model. In fact, even after trying out splines on all numerical variables and examining the gamma, poisson and negative binomial families, we still found that all these models did not fit the data well.
+Therefore, we choose to abandon the depth model.
 
 
 ## Model 2: ClickBi
@@ -309,6 +307,10 @@ fit.click <- glm(ClickBi~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA +
 
 ![](figs/ClickBiBin.png)
 
+Eyeballing the fit does not reveal which residual plot is created from the observed data, however the smoother catches a problem around the interval [-5,5] for the fitted values.
+
+In order to fix this problem, we test splines over our numerical variables. Splines on the ODBA variable leads to the best fit, however this has been judged after fitting splines on different variables, and so we risk overfitting. 
+
 
 ```{r}
 fit.click.sp <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic +
@@ -316,11 +318,16 @@ fit.click.sp <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic +
                     data = narwhal, family = "binomial")
 ```
 
+
 ![](figs/ClickBiBinSP.png)
+
+We see that adding splines on `ODBA` leads to a better fit. It is not immediately clear which plot belongs to the observed data. Even though the middle plot belongs to the observed data, one could suspect that it would be the top left plot.
+
+We accept this model. In order to understand the effect of `Phasesub` we plot predictions of `ClickBi` as a function of `ODBA`, and we distinguish between each type of phase and each whale. Plotting the prediction with a 95\% pointwise Wald confidence interval yields:
 
 ![](figs/ClickBiBinSPeffect.png)
 
-
+We see that for both whales the phase types "B" and "I" have almost equal effects, i.e. we see large overlaps of the confidence interval for all values of `ODBA`. Further, the phase type "T" is clearly distinguishable from the other two phases. We interpret this as the whales having a lower probability to click in the trial phase "T", i.e. at times where there is Seismic activity.
 
 
 ## Model 3: CallSum
@@ -334,8 +341,9 @@ fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA +
 
 ![](figs/CallSumPoisson.png)
 
+Noting the values on the scale on the axes, it is quite clear that the observed data doesn't follow the model. We did try to change the model family to negative binomial with a log link, but this resulted in similar problems. 
 
-
+Therefore, we choose to abandon the call model as well.
 
 
 ## Model 4: Strokerate
@@ -349,10 +357,7 @@ fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic
 
 ![](figs/PoissonStrokerate.png)
 
-
-
-
-
+We see a clear non-linear effect, and once again attempting to fit a spline on `ODBA` results in the following model:
 
 
 ```{r}
@@ -363,10 +368,12 @@ fit.strokerate.sp <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePerio
 
 ![](figs/PoissonStrokerateSP.png)
 
+We see that almost all nonlinear effect has been accounted for with the addition of the splines. However, there are still some issues for low fitted values. We now look at the effect of `Phasesub` on strokerate:
 
 ![](figs/PoissonStrokerateSPeffect.png)
 
-
+Only a slight difference between the phase "B" and the rest can be seen, and the phases "I" and "T" are nearly indistinguishable. One might interpret this as the whale having a lower strokerate when the boat is pressence. However, given the correlation between `ODBA` and `Strokerate` and our intuition about the connection of these variables, the shape of the non-linear effect of `ODBA` and `Strokerate` puzzles us. 
+For this reason, we hestitate to conclude anything from this model.
 
 
 ## Conclusion
@@ -374,20 +381,5 @@ fit.strokerate.sp <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePerio
 Our analysis of the data set started out with a cleaning of the data. Firstly, we combined some variables, deleted variables with lots of MNAR observations and removed collinear variables. We decided to aggregate the data to avoid having time series data. 
 Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
 
-We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the model of Strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
-
-As we were not able to test down into the submodel with `Phasesub` in any of the four models
-we were not able to make any conclusions on the effect of the boat or shooting the the behavior 
-of the whales. 
-
-
-```{r, include = FALSE}
-## Appendix
-
-
-#**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
-
-#```{r include=FALSE}
-#**INDSÆT EVT PLOT MED DISTANCE + Missing + phases**
-#```
-```
+We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the models of ClickBi and Strokerate were interesting to continue working with. The ClickBi model showed tha the whales clicked significantly less when there was seismic activity from the boat.
+The strokerate model on the other hand led to some counterintutive predictions, and hence we hestitate to make a conclusion based on it.
