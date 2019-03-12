@@ -115,7 +115,7 @@ dev.off()
 
 # Second model - spline on ODBA
 fit.click.sp <- glm(ClickBi ~ -1 + Phasesub + Area + Ind + Los + DaytimePeriodic + 
-                   ns(ODBA, df=5) + Dist.to.shore + Acou.qua, 
+                   ns(ODBA, df=4) + Dist.to.shore + Acou.qua, 
                  data = DATA, family = "binomial")
 
 png("figs/ClickBiBinSP.png")
@@ -178,9 +178,9 @@ residualplotter(fit.strokerate, 3,3)
 dev.off()
 
 
-# Second model - spline on ODBA
+# Second model - spline on ODBA, df = 4
 fit.strokerate.sp <- glm(Strokerate ~ -1 + Phasesub + Area + Ind + Los + DaytimePeriodic + 
-                        ns(ODBA, df=5)+ Dist.to.shore, 
+                        ns(ODBA, df=4)+ Dist.to.shore, 
                       data = DATA, family = "poisson")
 
 png("figs/PoissonStrokerateSP.png")
@@ -188,7 +188,7 @@ residualplotter(fit.strokerate.sp, 3,3)
 dev.off()
 
 png("figs/PoissonStrokerateSPeffect.png")
-splineeffect(fit.click.sp)
+splineeffect(fit.strokerate.sp)
 dev.off()
 
 # ns(ODBA, df=n) for n=3,4,5 virker ret godt !

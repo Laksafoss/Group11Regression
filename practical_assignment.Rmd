@@ -194,6 +194,7 @@ On the right we see a correlation plot for the categorical variables. This plot 
 Let us first look at our remaining potential respons variables. First we make density plots.
 
 ```{r new_data_readin, include=FALSE}
+library(splines)
 narwhal <- readRDS("outputs/narwhal_Minut.RDS")
 ```
 
@@ -282,7 +283,8 @@ To judge goodness of fit we will look at residual plots. We will plot the observ
 We fit our Depth model.
 
 ```{r}
-fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore,                  data = narwhal, family = Gamma(link = "log"))
+fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore, 
+                 data = narwhal, family = Gamma(link = "log"))
 ```
 
 In the below plot we have the residual plot of the observed data along with 8 residual plots created from simulated data.
@@ -292,25 +294,31 @@ In the below plot we have the residual plot of the observed data along with 8 re
 
 
 
-Quite clearly in this plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original dataset. 
-
-The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable dataseet, and so we also disregard these models.
 
 
-Quite clearly in both plots, one of the residual plots vary from the others. We conclude that the Depth model does not describe any relationship between the descriptive variables that may be in the original data set.
 
-The models were we instead have Click or Call as response variable also yield residual plots with one very distinguishable data set, and so we also disregard these models.
 
 ## Model 2: ClickBi
 
 We fit our Click model.
 
 ```{r}
-fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = narwhal, family = "binomial")
+fit.click <- glm(ClickBi~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore + Acou.qua, 
+                 data = narwhal, family = "binomial")
 ```
 
 ![](figs/ClickBiBin.png)
 
+
+```{r}
+fit.click.sp <- glm(ClickBi ~ Phasesub + Area + Ind + Los + DaytimePeriodic +
+                      ns(ODBA, df = 4) + Dist.to.shore + Acou.qua, 
+                    data = narwhal, family = "binomial")
+```
+
+![](figs/ClickBiBinSP.png)
+
+![](figs/ClickBiBinSPeffect.png)
 
 
 
@@ -320,7 +328,7 @@ fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.sh
 We fit our Call model.
 
 ```{r}
-fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = narwhal, family = "poisson")
+fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore + Acou.qua, data = narwhal, family = "poisson")
 ```
 
 
@@ -335,12 +343,29 @@ fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.sho
 We fit our strokerate model.
 
 ```{r}
-fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = narwhal, family = "poisson")
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA + Dist.to.shore, 
+                      data = narwhal, family = "poisson")
 ```
-  
+
 ![](figs/PoissonStrokerate.png)
 
-While the original data set is still distinguishable among the 8 simulated data sets, it does look like the data could be distributed as the model predicts - however, the tails seem a bit too heavy. As a next step, we could add splines to the model in e.g. the different quantiles and see whether the heavy tails could be fixed. The price, however, would be less interpretability of the model.
+
+
+
+
+
+
+```{r}
+fit.strokerate.sp <- glm(Strokerate ~ Phasesub + Area + Ind + Los + DaytimePeriodic + 
+                           ns(ODBA, df = 4) + Dist.to.shore, 
+                         data = narwhal, family = "poisson")
+```
+
+![](figs/PoissonStrokerateSP.png)
+
+
+![](figs/PoissonStrokerateSPeffect.png)
+
 
 
 
