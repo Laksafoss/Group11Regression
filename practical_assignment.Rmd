@@ -170,6 +170,7 @@ Thus we aggregate the data such that each observations corresponds to 1 minute. 
 * `StrokeRate` numeric; average stroke rate
 * `Los` factor; whether the whale was in the line of sight in the first observation
 * `Sun` factor; whether the sun was up or down at this time point 
+* `DaytimePeriodic` numeric; average value of our constructed variable
 
 Which yields a data set of 17.632 observations. As the data set consists of 16 variables, we will plot and analyze these variables in groups. There are 575 missing data points in `Dist.to.shore`. As we discussed in our section on "other missing values" it seems that there is no problem in simply removing these data lines. 
 
