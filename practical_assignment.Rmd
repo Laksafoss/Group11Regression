@@ -342,7 +342,7 @@ fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + DaytimePeriodic + ODBA +
 
 ![](figs/CallSumPoisson.png)
 
-Noting the values on the scale on the axes, it is quite clear that the observed data doesn't follow the model. We did try to change the model family to negative binomial with a log link, but this resulted in similar problems. 
+Noting the values on the scale on the axes, it is quite clear that the observed data doesn't follow the model. We did try to change the model family to negative binomial with a log link, but this resulted in similar problems. This is perhaps not surprising, since if one recalls the density plot of this variable, it is *extremely* skewed. 
 
 Therefore, we choose to abandon the call model as well.
 
