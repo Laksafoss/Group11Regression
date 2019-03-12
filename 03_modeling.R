@@ -21,6 +21,79 @@ DATA$Phasesub <- DATA$Phase <- factor(DATA$Phase, ordered = F)
 levels(DATA$Phasesub) <- list("B" = c("B"),
                               "T" = c("T0", "T1", "T2", "T3", "T4", "T5"),
                               "I" = c("I0", "I1", "I2", "I3", "I4", "I5"))
+DATA <- DATA[,-which(colnames(DATA)=="Phase")]
+
+# Setup for normal regression ===================================================
+residualplotter <- function(fit, n, m) {
+  dat <- fit$data
+  index <- sample(n*m, 1)
+  f <- fit$family
+  plots <- lapply(seq_len(n * m), function(i) {
+    if (i == index) {
+      true <- ggplot2::fortify(fit)
+      ggplot2::qplot(.fitted, .resid, data = true) + ggplot2::geom_smooth()
+    } else {
+      y <- simulate(fit)[,1]
+      form <- as.formula(
+        paste0("y ~ ", grep("~", fit$formula, value = T, invert = T)[2]))
+      glm <- glm(form, data = cbind(y = y, dat), family = f)
+      Diag <- ggplot2::fortify(glm)
+      ggplot2::qplot(.fitted, .resid, data = Diag) + ggplot2::geom_smooth()
+    }
+  })
+  print(index)
+  marrangeGrob(plots, ncol = n, nrow = m)
+}
+
+
+# Depth model ==================================================================
+
+# First model
+fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore, 
+                 data = DATA, family = Gamma(link = "log"))
+
+png("figs/GammaLogDepth.png")
+residualplotter(fit.depth, 3,3)
+dev.off()
+
+
+# Click model ==================================================================
+
+# First model
+fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + 
+                   Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
+
+png("figs/ClickBiBin.png")
+residualplotter(fit.click, 3,3)
+dev.off()
+
+
+# Call model ===================================================================
+
+# First model
+fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, 
+                data = DATA, family = "poisson")
+
+png("figs/CallSumPoisson.png")
+residualplotter(fit.call, 3,3)
+dev.off()
+
+
+
+# Strokerate model =============================================================
+
+# First model
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = DATA, family = "poisson")
+
+png("figs/PoissonStrokerate.png")
+residualplotter(fit.strokerate, 3,3)
+dev.off()
+
+
+
+
+
+
 
 
 ## create the desired model matrices
@@ -59,69 +132,16 @@ levels(DATA$Phasesub) <- list("B" = c("B"),
 #
 #
 #
-# Setup for normal regression ===================================================
-residualplotter <- function(fit, n, m) {
-  dat <- fit$data
-  index <- sample(n*m, 1)
-  f <- fit$family
-  plots <- lapply(seq_len(n * m), function(i) {
-    if (i == index) {
-      true <- ggplot2::fortify(fit)
-      ggplot2::qplot(.fitted, .resid, data = true) + ggplot2::geom_smooth()
-    } else {
-      y <- simulate(fit)[,1]
-      form <- as.formula(
-        paste0("y ~ ", grep("~", fit$formula, value = T, invert = T)[2]))
-      glm <- glm(form, data = cbind(y = y, dat), family = f)
-      Diag <- ggplot2::fortify(glm)
-      ggplot2::qplot(.fitted, .resid, data = Diag) + ggplot2::geom_smooth()
-    }
-  })
-  print(index)
-  marrangeGrob(plots, ncol = n, nrow = m)
-}
-
-# Setup for normal poisson regression ===================================================
-residualplotter_poisson <- function(fit, n, m) {
-  dat <- fit$data
-  index <- sample(n*m, 1)
-  plots <- lapply(seq_len(n * m), function(i) {
-    if (i == index) {
-      true <- ggplot2::fortify(fit)
-      ggplot2::qplot(.fitted, .resid, data = true) + ggplot2::geom_smooth()
-    } else {
-      y <- simulate(fit)[,1]
-      form <- as.formula(
-        paste0("y ~ ", grep("~", fit$formula, value = T, invert = T)[2]))
-      glm <- glm(form, data = cbind(y = y, dat), family = "poisson")
-      Diag <- ggplot2::fortify(glm)
-      ggplot2::qplot(.fitted, .resid, data = Diag) + ggplot2::geom_smooth()
-    }
-  })
-  print(index)
-  marrangeGrob(plots, ncol = n, nrow = m)
-}
 
 # Depth model ==================================================================
 
 # Ridge regression
-no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
-fit.depth <- netfitter(x[,-no], DATA$Depth, train)
-plot(fit.depth)
+#no <- which(colnames(x) %in% c("DiveTRUE","Acou.qua"))
+#fit.depth <- netfitter(x[,-no], DATA$Depth, train)
+#plot(fit.depth)
 
-fit.depth.sub <- netfitter(xsub[,-no], DATA$Depth, train)
-plot(fit.depth.sub)
-
-
-
-
-# normal regression
-fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore, data = DATA, family = Gamma(link = "log"))
-
-
-png("figs/GammaLogDepth.png")
-residualplotter(fit.depth, 3,3)
-dev.off()
+#fit.depth.sub <- netfitter(xsub[,-no], DATA$Depth, train)
+#plot(fit.depth.sub)
 
 
 # Click model ==================================================================
@@ -134,16 +154,6 @@ dev.off()
 #plot(fit.click.sub)
 
 
-# normal regression
-fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, data = DATA, family = "binomial")
-
-#anova(fit.click, fit.click.sub, test = "LRT") # Likelihood ratio test
-#anova(fit.click, fit.click.sub, test = "Cp")  # like AIC
-
-png("figs/ClickBiBin.png")
-residualplotter(fit.click, 3,3)
-dev.off()
-
 
 # Call model ===================================================================
 
@@ -155,16 +165,6 @@ dev.off()
 #plot(fit.call.sub)
 
 
-# normal regression
-fit.call <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, 
-                data = DATA, family = "poisson")
-
-#anova(fit.call, fit.call.sub, test = "LRT") # Likelihood ratio test
-#anova(fit.call, fit.call.sub, test = "Cp")  # like AIC
-
-png("figs/CallSumPoisson.png")
-residualplotter(fit.call, 3,3)
-dev.off()
 
 
 # Strokerate model =============================================================
@@ -177,10 +177,3 @@ dev.off()
 #fit.strokerate.sub <- netfitter(xsub[,-no], DATA$StrokeRate, train)
 #plot(fit.strokerate.sub)
 
-
-# normal regression
-fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = DATA, family = "poisson")
-
-png("figs/PoissonStrokerate.png")
-residualplotter(fit.strokerate, 3,3)
-dev.off()
