@@ -1,6 +1,6 @@
 library(lubridate) # for date and times
 library(dplyr) # general purpose data manipulation
-
+library(ggplot2)
 
 
 # ==  STEP 1  :  CLEAN UP RAW DATA A BIT  ======================================
@@ -80,6 +80,13 @@ NaStrokeDF <- rbind(NAStrokeDF[,2:5], fullDF)
 saveRDS(NaStrokeDF, file = "outputs/NAStrokeDf.RDS")
 
 narwhal <- narwhal %>% filter(!is.na(Strokerate))
+# Time periodicity
+SECS_IN_DAY <- 60*60*24
+scaler <- function(x) x/SECS_IN_DAY * pi * 2
+toPeriodic <- function(x) cos(scaler(x)) + sin(scaler(x))
+narwhal$TimeOFDayPeriodic <- as.integer(narwhal$Datetime) %% SECS_IN_DAY 
+narwhal$TimeOFDayPeriodic <- toPeriodic(narwhal$TimeOFDayPeriodic) * -1
+
 # Save
 narwhal <- narwhal %>% ungroup()
 
