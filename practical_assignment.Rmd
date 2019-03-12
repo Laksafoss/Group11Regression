@@ -346,7 +346,8 @@ While the original data set is still distinguishable among the 8 simulated data 
 
 ## Conclusion
 
-Our analysis of the data set started out with a cleaning of the data. Firstly, we combined some variables, removed co-linear variables and aggregated the data into intervals. Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
+Our analysis of the data set started out with a cleaning of the data. Firstly, we combined some variables, deleted variables with lots of MNAR observations and removed collinear variables. We decided to aggregate the data to avoid having time series data. 
+Further, by plotting different explanatory variables, we deemed some variables to not have any significance for the response variables we had selected beforehand. These explanatory variables were then discarded.
 
 We then continued into the analysis of our data set. We tested various models for our selected response variables, but only the model of Strokerate seemed to be somewhat accurate. However, even this model had problems with heavy tails. As a solution to this, we wish to experiment with splines.
 
