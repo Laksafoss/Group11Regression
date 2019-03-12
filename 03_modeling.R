@@ -46,6 +46,7 @@ residualplotter <- function(fit, n, m) {
 }
 
 
+
 # Depth model ==================================================================
 
 # First model
@@ -55,6 +56,19 @@ fit.depth <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + ODBA+ Dist.to.shore
 png("figs/GammaLogDepth.png")
 residualplotter(fit.depth, 3,3)
 dev.off()
+
+# ns(ODBA, df = 3) giver ikke noget fornuftigt
+# erstatte Sun med ns(Start, df = 7) giver ikke noget fornuftigt
+# negative.binomial(theta) for theta = 2,5,7 giver ikke noget fornuftigt
+
+# dummy model for testing ideas
+fit.depth.dummy <- glm(Depth ~ Phasesub + Area + Ind + Los + Sun + 
+                         ns(Start, df = 7) + ODBA+ Dist.to.shore, 
+                       data = DATA, family = negative.binomial(7))
+residualplotter(fit.depth.dummy, 2,2)
+
+# ----------------------------------------------------------------</depth model>
+
 
 
 # Click model ==================================================================
@@ -66,6 +80,20 @@ fit.click <- glm(ClickBi ~ Phasesub + Area + Ind + Los + Sun + ODBA +
 png("figs/ClickBiBin.png")
 residualplotter(fit.click, 3,3)
 dev.off()
+
+# ns(Dist.to.shore, df = 3) forbedrer ikke smootheren i residual plottet
+# ns(ODBA, df = n) ser lovende ud, har kigget på n=2,3,4. 
+# fjern Sun tilføj ns(Start, df = n) forbedrer ikke smootheren for n = 6,7
+
+
+# dummy model for testing ideas
+fit.click.dummy <- glm(ClickBi ~ Phasesub + Area + Ind + Los + ns(Start, df = 6) + ODBA + 
+                   Dist.to.shore + Acou.qua, 
+                   data = DATA, family = "binomial")
+residualplotter(fit.click.dummy, 3, 3)
+
+# ----------------------------------------------------------------</click model>
+
 
 
 # Call model ===================================================================
@@ -80,10 +108,20 @@ dev.off()
 
 
 
+# dummy model for testing ideas
+fit.call.dummy <- glm(CallSum ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore + Acou.qua, 
+                data = DATA, family = "poisson")
+residualplotter(fit.call.dummy, 2, 2)
+
+# -----------------------------------------------------------------</call model>
+
+
+
 # Strokerate model =============================================================
 
 # First model
-fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, data = DATA, family = "poisson")
+fit.strokerate <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, 
+                      data = DATA, family = "poisson")
 
 png("figs/PoissonStrokerate.png")
 residualplotter(fit.strokerate, 3,3)
@@ -91,8 +129,24 @@ dev.off()
 
 
 
+# dummy model for testing ideas
+fit.strokerate.dummy <- glm(Strokerate ~ Phasesub + Area + Ind + Los + Sun + ODBA + Dist.to.shore, 
+                      data = DATA, family = "poisson")
+residualplotter(fit.strokerate.dummy, 2,2)
+
+# -----------------------------------------------------------</strokerate model>
 
 
+
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ##                                                                      ## ##
+## ##                    R I D G E   R E G R E S S I O N                   ## ##
+## ##                                                                      ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 
 
@@ -129,9 +183,8 @@ dev.off()
 #  plot(x$cv); abline(v = log(x$cv$lambda.min))
 #  par(mfrow=c(1,1))
 #}
-#
-#
-#
+
+
 
 # Depth model ==================================================================
 
