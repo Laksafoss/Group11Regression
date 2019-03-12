@@ -111,6 +111,8 @@ As a small novelty we have looked up the sunrise and sundown times august 16th 2
 
 To be able to include the (potential) effect of the time of day even more precise than the `Sun` factor called `DaytimePeriodic`. This numerical variable encodes the time of day in a periodic manner. It is encoded such that the largest positive value corresponds to 15:00 and the (numerically) largest negative value corresponds to 03:00.
 
+![](figs/periodicplot.png)
+
 ### Longitude, Latitude and area
 
 We plot Long/lat against each other and color it by Datetime, to see if there are som oddities.
